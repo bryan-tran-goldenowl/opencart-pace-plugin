@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<modification>
+  <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
+  <name>pace</name>
+  <version>1.0.0</version>
+  <code>1.0.0</code>
+  <author>nguyen</author>
+  <link>localhost.com</link>
+
+  <!-- single widget load html -->
+  <file path="catalog/view/theme/*/template/product/product.twig" error="log">
+    <operation>
+      <search><![CDATA[<div id="product">]]></search>
+      <add position="replace"><![CDATA[
+     <div id="single-widget" 
+     data-enable='{{payment_pace_checkout_product_widget_status}}'
+     data-price='{{pace_price}}' 
+     data-theme='{{payment_pace_checkout_product_theme_color}}'
+     data-primary='{{payment_pace_checkout_product_primary_color}}'
+     data-second='{{payment_pace_checkout_product_second_color}}'
+     data-fontsize='{{payment_pace_checkout_product_fontsize}}'
+     style='{{payment_pace_checkout_product_widget_style}}'
+     > </div>
+      <div id="product">
+     ]]></add>
+    </operation>
+  </file>
+
+  <!-- multiple widget load html -->
+
+
+<file path="catalog/view/theme/*/template/product/category.twig" error="log">
+    <operation>
+      <search><![CDATA[{% if product.rating %}]]></search>
+      <add position="replace"><![CDATA[
+      <div id="multiple-widget" 
+      data-price='{{product.pace_price}}'
+      data-enable='{{payment_pace_checkout_catalog_widget_status}}'
+      data-theme='{{payment_pace_checkout_catalog_theme_color}}'
+      data-primary='{{payment_pace_checkout_catalog_primary_color}}'
+      data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'
+      style='{{payment_pace_checkout_catalog_widget_style}}'
+      > </div>
+     {% if product.rating %}
+     ]]></add>
+    </operation>
+  </file>
+
+
+<file path="catalog/view/theme/*/template/extension/module/featured.twig" error="log">
+    <operation>
+      <search><![CDATA[<div class="button-group">]]></search>
+      <add position="replace"><![CDATA[
+      <div id="multiple-widget" 
+      data-price='{{product.pace_price}}'
+      data-enable='{{payment_pace_checkout_catalog_widget_status}}'
+      data-theme='{{payment_pace_checkout_catalog_theme_color}}'
+      data-primary='{{payment_pace_checkout_catalog_primary_color}}'
+      data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'
+      style='{{payment_pace_checkout_catalog_widget_style}}'
+      > </div>
+     <div class="button-group">
+     ]]></add>
+    </operation>
+  </file>
+
+
+<!-- load js file -->
+<file path="catalog/controller/common/header.php" error="log">
+    <operation>
+      <search><![CDATA[$data['analytics'] = array();]]></search>
+      <add position="replace"><![CDATA[
+          $this->load->model('setting/setting');
+          
+          $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+
+          if($setting['payment_pace_checkout_fallback_widget']){
+             $this->document->addScript('/catalog/view/javascript/pace/checkout.js');
+          } else {
+             $this->document->addScript('/catalog/view/javascript/pace/checkout-without-fallback.js');
+          }
+         
+          $this->document->addScript('/catalog/view/javascript/pace/pace-widget.js');
+		      
+                    if($setting['payment_pace_checkout_status'] && !$setting['payment_pace_checkout_status_sandbox']){
+                      $this->document->addScript('https://pay.pacenow.co/pace-pay.js', 'header', true);
+                    } else if($setting['payment_pace_checkout_status_sandbox']){
+                      $this->document->addScript('https://pay-playground.pacenow.co/pace-pay.js', 'header', true);
+                    }
+          
+     $data['analytics'] = array();
+     ]]></add>
+    </operation>
+  </file>
+
+  
+
+<!-- single widget logic change money -->
+  <file path="catalog/controller/product/product.php" error="log">
+    <operation>
+      <search><![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+      $data['pace_price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), false); 
+		  $this->load->model('setting/setting');
+      $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+		  $data['payment_pace_checkout_product_widget_status'] = $setting['payment_pace_checkout_product_widget_status'];
+      $data['payment_pace_checkout_product_theme_color'] = $setting['payment_pace_checkout_product_theme_color'];
+		  $data['payment_pace_checkout_product_primary_color'] = $setting['payment_pace_checkout_product_primary_color'];
+		  $data['payment_pace_checkout_product_second_color'] = $setting['payment_pace_checkout_product_second_color'];
+		  $data['payment_pace_checkout_product_fontsize'] = $setting['payment_pace_checkout_product_fontsize'];
+		  $data['payment_pace_checkout_product_widget_style'] = $setting['payment_pace_checkout_product_widget_style'];
+      $data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+     ]]></add>
+    </operation>
+  </file>
+
+
+   <file path="catalog/controller/product/product.php" error="log">
+    <operation>
+      <search><![CDATA[$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+      $data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+      $data['pace_price'] =  $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+     ]]></add>
+    </operation>
+  </file>
+
+
+<!-- multiple widget logic change money -->
+
+
+
+   <file path="catalog/controller/product/category.php" error="log">
+    <operation>
+      <search><![CDATA[$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+      $price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+      $this->load->model('setting/setting');
+      $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+      $data['payment_pace_checkout_catalog_widget_status'] = $setting['payment_pace_checkout_catalog_widget_status'];
+      $data['payment_pace_checkout_catalog_theme_color'] = $setting['payment_pace_checkout_catalog_theme_color'];
+		  $data['payment_pace_checkout_catalog_primary_color'] = $setting['payment_pace_checkout_catalog_primary_color'];
+		  $data['payment_pace_checkout_catalog_fontsize'] = $setting['payment_pace_checkout_catalog_fontsize'];
+		  $data['payment_pace_checkout_catalog_widget_style'] = $setting['payment_pace_checkout_catalog_widget_style'];
+      $pace_price =  $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+     ]]></add>
+    </operation>
+  </file>
+
+
+  <file path="catalog/controller/product/category.php" error="log">
+    <operation>
+      <search><![CDATA[	$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+      $special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+      $pace_price =  $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+     ]]></add>
+    </operation>
+  </file>
+
+  <file path="catalog/controller/product/category.php" error="log">
+    <operation>
+      <search><![CDATA[	$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+      $special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+      $pace_price =  $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+     ]]></add>
+    </operation>
+  </file>
+
+
+
+  <file path="catalog/controller/product/category.php" error="log">
+    <operation>
+      <search><![CDATA['price'       => $price,]]></search>
+      <add position="replace"><![CDATA[
+     'price'       => $price,
+     'pace_price'   => $pace_price,
+     ]]></add>
+    </operation>
+  </file>
+
+
+<!-- multiple widget for feature page -->
+
+
+<file path="catalog/controller/extension/module/featured.php" error="log">
+    <operation>
+      <search><![CDATA[$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+    $price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+    $pace_price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+     $this->load->model('setting/setting');
+      $setting_pace = $this->model_setting_setting->getSetting('payment_pace_checkout');
+      $data['payment_pace_checkout_catalog_widget_status'] = $setting_pace['payment_pace_checkout_catalog_widget_status'];
+      $data['payment_pace_checkout_catalog_theme_color'] = $setting_pace['payment_pace_checkout_catalog_theme_color'];
+		  $data['payment_pace_checkout_catalog_primary_color'] = $setting_pace['payment_pace_checkout_catalog_primary_color'];
+		  $data['payment_pace_checkout_catalog_fontsize'] = $setting_pace['payment_pace_checkout_catalog_fontsize'];
+		  $data['payment_pace_checkout_catalog_widget_style'] = $setting_pace['payment_pace_checkout_catalog_widget_style'];
+     ]]></add>
+    </operation>
+  </file>
+
+
+  <file path="catalog/controller/extension/module/featured.php" error="log">
+    <operation>
+      <search><![CDATA[$special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
+      <add position="replace"><![CDATA[
+    $special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+    $pace_price = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+     ]]></add>
+    </operation>
+  </file>
+
+
+   <file path="catalog/controller/extension/module/featured.php" error="log">
+    <operation>
+      <search><![CDATA['price'       => $price,]]></search>
+      <add position="replace"><![CDATA[
+     'price'       => $price,
+     'pace_price'   => $pace_price,
+     ]]></add>
+    </operation>
+  </file>
+
+
+ <file path="catalog/model/checkout/order.php" error="log">
+    <operation>
+      <search><![CDATA[// Update the DB with the new statuses]]></search>
+      <add position="replace"><![CDATA[
+     
+     if($order_status_id === "7") {
+				$this->load->model('extension/module/pace');
+				$this->model_extension_module_pace->cancel_transaction($order_info);
+			}
+
+      // Update the DB with the new statuses
+     ]]></add>
+    </operation>
+  </file>
+
+
+  <file path="catalog/controller/checkout/failure.php" error="log">
+    <operation>
+      <search><![CDATA[public function index() {]]></search>
+      <add position="replace"><![CDATA[
+     
+    private function handleCancelTransaction()
+    {
+
+        $this->load->model('extension/module/pace');
+        $order_id = $this->session->data['order_id'];
+
+        $user = $this->model_extension_module_pace->getUser();
+        $transaction = $this->model_extension_module_pace->getOrderTransaction($order_id) ? json_decode($this->model_extension_module_pace->getOrderTransaction($order_id)['data'], true) : [];
+        if (!$transaction) {
+            throw new \Exception('Error: Could not find transaction ');
+        }
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $user['api'] . '/v1/checkouts/' . $transaction['transactionID'] . '/cancel');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        $headers = array();
+        $headers[] = 'Content-Type: text/plain';
+
+        $headers[] = 'Authorization: Basic ' . base64_encode($user['user_name'] . ':' . $user['password']);;
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        $result = json_decode($result);
+        if (!!$result->success) {
+            $this->model_extension_module_pace->addOrderHistory($order_id, 7);
+        }
+        curl_close($ch);
+    }
+
+    public function index() {
+       $result =  $this->handleCancelTransaction();
+        if (isset($this->session->data['order_id'])) {
+            $this->cart->clear();
+
+            unset($this->session->data['shipping_method']);
+            unset($this->session->data['shipping_methods']);
+            unset($this->session->data['payment_method']);
+            unset($this->session->data['payment_methods']);
+            unset($this->session->data['guest']);
+            unset($this->session->data['comment']);
+            unset($this->session->data['order_id']);
+            unset($this->session->data['coupon']);
+            unset($this->session->data['reward']);
+            unset($this->session->data['voucher']);
+            unset($this->session->data['vouchers']);
+            unset($this->session->data['totals']);
+        }
+     ]]></add>
+    </operation>
+  </file>
+
+
+
+<!-- fix not show widget -->
+ <file path="system/{engine,library}/{action,loader,config,language}*.php|system/library/template/template.php">
+    <operation>
+      <search regex="true">
+        <![CDATA[~(require|include)(_once)?\(([^)]+)~]]>
+      </search>
+      <add position="replace">
+        <![CDATA[$1$2(modification($3)]]>
+      </add>
+    </operation>
+  </file>
+  <file path="system/library/template/twig.php">
+    <operation>
+      <search>
+        <![CDATA[if (is_file($file)) {]]>
+      </search>
+      <add position="replace">
+        <![CDATA[if (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {	
+                $code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
+            } elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
+                $code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
+            } elseif (is_file($file)) {]]>
+      </add>
+    </operation>
+  </file>
+
+
+
+
+  
+
+</modification>
+

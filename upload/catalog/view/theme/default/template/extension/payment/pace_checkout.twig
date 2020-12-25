@@ -1,0 +1,72 @@
+<style>
+	.flex-column {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.align-self-end {
+		align-self: flex-end
+	}
+</style>
+
+<div class="flex-column">
+	<div class="align-self-end" id='pace-pay-widget-container' data-price='{{price}}' data-enabled='{{payment_pace_checkout_widget_status}}' data-second="{{payment_pace_checkout_second_color}}" data-primary="{{payment_pace_checkout_primary_color}}" data-timeline="{{payment_pace_checkout_text_timeline_color}}" data-background="{{payment_pace_checkout_background_color}}" data-foreground="{{payment_pace_checkout_foreground_color}}" data-fontsize="{{payment_pace_checkout_fontsize}}"/>
+
+
+	<div class="buttons">
+		<div class="pull-right">
+			<input type="button" value="{{ button_confirm }}" id="button-confirm" data-loading-text="{{ text_loading }}" class="btn btn-primary"/>
+			<div class="checkout-transaction"></div>
+		</div>
+	</div>
+</div>
+<script defer src="https://pay-playground.pacenow.co/pace-pay.js"></script>
+<script src="/catalog/view/javascript/opencart/opencart.js"></script>
+<script type="text/javascript">
+
+
+window.pace_widget.show_checkout_widget();
+$('#button-confirm').on('click', function() {
+    $.ajax({
+        url: 'index.php?route=extension/payment/pace_checkout/confirm',
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-confirm').button('loading');
+        },
+        complete: function() {
+            $('#button-confirm').button('reset');
+        },
+        success: function(json) {
+			console.log("return json ")
+            switch (json.pace_mode) {
+                case "1":
+                    pacePay.popup({
+                        txnToken: json.token,
+                        onSuccess: function(data) {
+                            if (json['redirect_success']) {
+                                location = json['redirect_success'];
+                            }
+                        },
+                        onCancel: function() {
+                            if (json['redirect_failure']) {
+                                location = json['redirect_failure']
+                            }
+                        },
+                        onLoad: function() {
+                            pacePay.hideProgressModal();
+                        }
+                    });
+                    break;
+                case "2":
+                    pacePay.redirect(json.token);
+                    break;
+            }
+
+
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
+});
+</script>
