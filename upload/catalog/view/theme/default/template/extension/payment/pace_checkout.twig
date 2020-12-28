@@ -23,50 +23,70 @@
 <script defer src="https://pay-playground.pacenow.co/pace-pay.js"></script>
 <script src="/catalog/view/javascript/opencart/opencart.js"></script>
 <script type="text/javascript">
+    window.pace_widget.show_checkout_widget();
+    $('#button-confirm').on('click', function() {
+        $.ajax({
+            url: 'index.php?route=extension/payment/pace_checkout/confirm',
+            dataType: 'json',
+            beforeSend: function() {
+                $('#button-confirm').button('loading');
+            },
+            complete: function() {
+                $('#button-confirm').button('reset');
+            },
+            success: function(json) {
+                console.log("return json ")
+                var txnToken = json.data ? json.data.token : json.token;
+                switch (json.pace_mode) {
+                    case "1":
+                        pacePay.popup({
+                            txnToken: txnToken,
+                            onSuccess: function(data) {
+                                // Update order status based on Pace transaction
+                                updateOrderStatus( 
+                                    { 
+                                        order_id: json.order_id, 
+                                        status: json.status 
+                                    } 
+                                );
 
-
-window.pace_widget.show_checkout_widget();
-$('#button-confirm').on('click', function() {
-    $.ajax({
-        url: 'index.php?route=extension/payment/pace_checkout/confirm',
-        dataType: 'json',
-        beforeSend: function() {
-            $('#button-confirm').button('loading');
-        },
-        complete: function() {
-            $('#button-confirm').button('reset');
-        },
-        success: function(json) {
-			console.log("return json ")
-            switch (json.pace_mode) {
-                case "1":
-                    pacePay.popup({
-                        txnToken: json.token,
-                        onSuccess: function(data) {
-                            if (json['redirect_success']) {
-                                location = json['redirect_success'];
+                                if (json['redirect_success']) {
+                                    location = json['redirect_success'];
+                                }
+                            },
+                            onCancel: function() {
+                                if (json['redirect_failure']) {
+                                    location = json['redirect_failure']
+                                }
+                            },
+                            onLoad: function() {
+                                pacePay.hideProgressModal();
                             }
-                        },
-                        onCancel: function() {
-                            if (json['redirect_failure']) {
-                                location = json['redirect_failure']
-                            }
-                        },
-                        onLoad: function() {
-                            pacePay.hideProgressModal();
-                        }
-                    });
-                    break;
-                case "2":
-                    pacePay.redirect(json.token);
-                    break;
+                        });
+                        break;
+                    case "2":
+                        pacePay.redirect(json.token);
+                        break;
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
             }
-
-
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-        }
+        });
     });
-});
+
+    /**
+     * Update order status after processing Pace transaction
+     * @param  {object} result   Pace transaction object result
+     */ 
+    var updateOrderStatus = function( result ) {
+        $.ajax({
+            url: 'index.php?route=extension/payment/pace_checkout/updateOrderStatus&orderID=' + result.order_id + '&status=' + result.status,
+            type: 'GET',
+            success: function( xfn ) {
+                console.log( xfn );
+            },
+            async: false
+        });
+    }
 </script>
