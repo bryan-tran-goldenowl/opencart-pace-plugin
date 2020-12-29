@@ -69,6 +69,8 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'payment_pace_checkout_pace_mode',
 			'payment_pace_checkout_status_sandbox',
 			'payment_pace_checkout_order_status_id',
+			'payment_pace_checkout_order_status_transaction_cancelled',
+			'payment_pace_checkout_order_status_transaction_expired',
 			'payment_pace_checkout_username',
 			'payment_pace_checkout_password',
 			'payment_pace_checkout_username_sandbox',
@@ -104,10 +106,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 				$data[$value] = $this->config->get($value);
 			}
 		}
-
-
-
-
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');

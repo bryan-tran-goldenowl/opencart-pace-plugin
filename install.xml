@@ -275,7 +275,10 @@
         }
         $result = json_decode($result);
         if (!!$result->success) {
-            $this->model_extension_module_pace->addOrderHistory($order_id, 7);
+          $this->load->model('setting/setting');
+          $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+
+          $this->model_extension_module_pace->addOrderHistory($order_id, (int) $setting['payment_pace_checkout_order_status_transaction_cancelled']);
         }
         curl_close($ch);
     }
