@@ -19,37 +19,48 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 	public function confirm()
 	{
+		$errors = array();
+
 		try {
-			$json = array();
 			$this->load->model('extension/module/pace');
 			$this->load->model('checkout/order');
 			$this->load->model('setting/setting');
+			$this->load->language('extension/payment/pace_checkout');
 
 			if ($this->session->data['payment_method']['code'] == 'pace_checkout') {
-
-
 				$data = $this->session->data;
 				$result = [];
 				$order = $this->model_extension_module_pace->getOrder($this->session->data['order_id']);
 				$transaction = $this->model_extension_module_pace->getOrderTransaction($this->session->data['order_id']);
-				$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payment_pace_checkout_order_status_id'));
+
 				if (!$transaction) {
 					$result = $this->handleCreateTransaction();
 					$transaction = json_decode($result, true);
-					if ($transaction['error']) {
+					// attach order id to transaction
+					$transaction['order_id'] = (int) $this->session->data['order_id'];
+					
+					if ( isset( $transaction['error'] ) ) {
+						$errors['error'] = sprintf($this->language->get('create_transaction_error'), $transaction['correlation_id']);
 						throw new \Exception("Can not create transaction");
 					}
+
+					$order_status = (int) $this->model_extension_module_pace->updateOrderStatus($transaction); /*update orders status based on Pace transaction*/
+					$this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status);
 					$this->model_extension_module_pace->insertTransaction($this->session->data['order_id'], $transaction['transactionID'], $result);
 				}
-				$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
-				$transaction['pace_mode'] = $setting['payment_pace_checkout_pace_mode'];
+
+				$setting                         = $this->model_setting_setting->getSetting('payment_pace_checkout');
+				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
 				$transaction['redirect_success'] = $this->url->link('checkout/success');
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
 			}
+
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($transaction));
 		} catch (Exception $e) {
-			throw new \Exception("Unknow error ");
+			// throw new \Exception( $e->getMessage );
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($errors));
 		}
 	}
 
