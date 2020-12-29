@@ -77,11 +77,15 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 	private function setCart()
 	{
+		$url = ($this->request->server['HTTPS'] ? HTTPS_SERVER : HTTP_SERVER)
+		. "admin/index.php?route=extension/payment/pace_checkout/runCron";
+		$user = $this->model_extension_module_pace->getUser();
+		$url = preg_replace("/([http|https]:\/\/)/","$1$user[user_name]:$user[password]@" ,$url);
 		$data = $this->session->data;
 		return array(
 			'items'		   => [],
 			'amount'	   => $this->cart->getTotal() * 100,
-			// 'currency'     =>  $data['currency'],
+			'webhookUrl'	=> $url,
 			'currency'     =>  "SGD",
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
