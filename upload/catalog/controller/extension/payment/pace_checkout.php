@@ -20,11 +20,13 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 	public function confirm()
 	{
+		$errors = array();
+
 		try {
-			$json = array();
 			$this->load->model('extension/module/pace');
 			$this->load->model('checkout/order');
 			$this->load->model('setting/setting');
+			$this->load->language('extension/payment/pace_checkout');
 
 			if ($this->session->data['payment_method']['code'] == 'pace_checkout') {
 				$data = $this->session->data;
@@ -37,8 +39,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 					$transaction = json_decode($result, true);
 					// attach order id to transaction
 					$transaction['order_id'] = (int) $this->session->data['order_id'];
-
+					
 					if ( isset( $transaction['error'] ) ) {
+						$errors['error'] = sprintf($this->language->get('create_transaction_error'), $transaction['correlation_id']);
 						throw new \Exception("Can not create transaction");
 					}
 
@@ -56,7 +59,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($transaction));
 		} catch (Exception $e) {
-			throw new \Exception("Unknow error ");
+			// throw new \Exception( $e->getMessage );
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($errors));
 		}
 	}
 
