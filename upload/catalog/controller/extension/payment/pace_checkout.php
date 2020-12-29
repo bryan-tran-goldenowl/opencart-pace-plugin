@@ -5,15 +5,16 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	{
 
 		$this->load->model('setting/setting');
-		$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
-		$data['payment_pace_checkout_widget_status'] = $setting['payment_pace_checkout_widget_status'];
-		$data['payment_pace_checkout_primary_color'] = $setting['payment_pace_checkout_primary_color'];
-		$data['payment_pace_checkout_second_color'] = $setting['payment_pace_checkout_second_color'];
+		$setting                                           = $this->model_setting_setting->getSetting('payment_pace_checkout');
+		$data['payment_pace_checkout_widget_status']       = $setting['payment_pace_checkout_widget_status'];
+		$data['payment_pace_checkout_primary_color']       = $setting['payment_pace_checkout_primary_color'];
+		$data['payment_pace_checkout_second_color']        = $setting['payment_pace_checkout_second_color'];
 		$data['payment_pace_checkout_text_timeline_color'] = $setting['payment_pace_checkout_text_timeline_color'];
-		$data['payment_pace_checkout_background_color'] = $setting['payment_pace_checkout_background_color'];
-		$data['payment_pace_checkout_foreground_color'] = $setting['payment_pace_checkout_foreground_color'];
-		$data['payment_pace_checkout_fontsize'] = $setting['payment_pace_checkout_fontsize'];
-		$data['price'] = $this->cart->getTotal();
+		$data['payment_pace_checkout_background_color']    = $setting['payment_pace_checkout_background_color'];
+		$data['payment_pace_checkout_foreground_color']    = $setting['payment_pace_checkout_foreground_color'];
+		$data['payment_pace_checkout_fontsize']            = $setting['payment_pace_checkout_fontsize'];
+		$data['price']                                     = $this->cart->getTotal();
+
 		return $this->load->view('extension/payment/pace_checkout', $data);
 	}
 
@@ -62,6 +63,16 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($errors));
 		}
+	}
+
+	public function updateOrderStatus() {
+		extract( $_GET ); /* retrieve get params */
+
+		$this->load->model( 'extension/module/pace' );
+		$statuses = $this->model_extension_module_pace->updateOrderStatus( $status );
+		$_sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $statuses, $orderID );
+		// do update
+		$this->db->query( $_sql );
 	}
 
 	private function setCart()

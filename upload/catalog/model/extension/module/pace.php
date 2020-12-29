@@ -107,6 +107,39 @@ class ModelExtensionModulePace extends Model
 			$data . "'");
 	}
 
+	/**
+	 * Get order status based on Pace transaction
+	 * @param  Array|String $transaction
+	 * @return number              
+	 */
+	public function updateOrderStatus($transaction) {
+		try {
+			// load Pace settings
+			$this->load->model('setting/setting');
+			$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+			$statuses = is_array( $transaction ) ? $transaction['status'] : $transaction;
+			$order_status = null;
+
+			switch ( $statuses ) {
+				case 'cancelled':
+					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_cancelled'];
+					break;
+				case 'expired':
+					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_expired'];
+					break;
+				case 'approved':
+					$order_status = 5;
+					break;
+				default:
+					$order_status = 1;
+					break;
+			}
+			return $order_status;
+		} catch (Exception $e) {
+			throw new \Exception($e->getMessage());
+		}
+	}
+
 	public function updateTransaction($order_id, $data)
 	{
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET   payment_custom_field = '" . $this->db->escape(isset($data['payment_custom_field']) ? json_encode($data['payment_custom_field']) : '') . "' where order_id =  $order_id");
