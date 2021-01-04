@@ -334,9 +334,62 @@
   </file>
 
 
+   <file path="admin/controller/startup/login.php">
+      <operation>
+         <search index="0,1"><![CDATA[$ignore = array(]]></search>
+         <add position="after"><![CDATA[			'extension/payment/pace_checkout/runCron',]]></add>
+      </operation>
+   </file>
+
+   <file path="admin/controller/startup/permission.php">
+      <operation>
+         <search index="0"><![CDATA[$ignore = array(]]></search>
+         <add position="after"><![CDATA[				'extension/payment/pace_checkout',]]></add>
+      </operation>
+   </file> 
+
+    <file path="catalog/controller/product/search.php" error="log">
+    <operation>
+      <search><![CDATA['price'       => $price,]]></search>
+      <add position="replace"><![CDATA[
+     'price'       => $price,
+     'pace_price'   => $special ? $special : $price,
+     ]]></add>
+    </operation>
+  </file>
 
 
-  
+   <file path="catalog/controller/product/search.php" error="log">
+    <operation>
+      <search><![CDATA[$data['products'] = array();]]></search>
+      <add position="replace"><![CDATA[
+      $data['products'] = array();
+      $this->load->model('setting/setting');
+      $setting_pace = $this->model_setting_setting->getSetting('payment_pace_checkout');
+      $data['payment_pace_checkout_catalog_widget_status'] = $setting_pace['payment_pace_checkout_catalog_widget_status'];
+      $data['payment_pace_checkout_catalog_theme_color'] = $setting_pace['payment_pace_checkout_catalog_theme_color'];
+		  $data['payment_pace_checkout_catalog_primary_color'] = $setting_pace['payment_pace_checkout_catalog_primary_color'];
+		  $data['payment_pace_checkout_catalog_fontsize'] = $setting_pace['payment_pace_checkout_catalog_fontsize'];
+		  $data['payment_pace_checkout_catalog_widget_style'] = $setting_pace['payment_pace_checkout_catalog_widget_style'];
+     ]]></add>
+    </operation>
+  </file>
 
+  <file path="catalog/view/theme/*/template/product/search.twig" error="log">
+    <operation>
+      <search><![CDATA[{% if product.rating %}]]></search>
+      <add position="replace"><![CDATA[
+      <div id="multiple-widget" 
+      data-price='{{product.pace_price}}'
+      data-enable='{{payment_pace_checkout_catalog_widget_status}}'
+      data-theme='{{payment_pace_checkout_catalog_theme_color}}'
+      data-primary='{{payment_pace_checkout_catalog_primary_color}}'
+      data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'
+      style='{{payment_pace_checkout_catalog_widget_style}}'
+      > </div>
+     {% if product.rating %}
+     ]]></add>
+    </operation>
+  </file>
 </modification>
 
