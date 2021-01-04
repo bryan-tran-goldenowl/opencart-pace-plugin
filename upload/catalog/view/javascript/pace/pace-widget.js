@@ -30,7 +30,7 @@ $(window).load(function() {
           containerSelector: "#single-widget",
           type: "single-product",
           styles: {
-            logoTheme: data.themeColor == 1 ? "dark" : "light",
+            logoTheme: data.theme == 1 ? "dark" : "light",
             textPrimaryColor: data.primary,
             textSecondaryColor: data.second,
             fontSize: (data.fontsize ? data.fontsize : 13) + "px"
@@ -51,7 +51,7 @@ $(window).load(function() {
           containerSelector: "#multiple-widget",
           type: "multi-products",
           styles: {
-            logoTheme: data.themeColor == 1 ? "dark" : "light",
+            logoTheme: data.theme == 1 ? "dark" : "light",
             textColor: data.primary,
             fontSize: (data.fontsize ? data.fontsize : 13) + "px"
           }
@@ -81,7 +81,7 @@ $(window).load(function() {
             timelineColor: data.timeline,
             backgroundColor: data.background,
             foregroundColor: data.foreground,
-            fontSize: data.fontsize
+            fontSize: (data.fontsize ? data.fontsize : 13) + "px"
           }
         });
       }
