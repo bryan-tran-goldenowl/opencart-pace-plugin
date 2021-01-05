@@ -418,7 +418,7 @@ window.onload = function(){
             </div>
           </div>
           <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ pay_mode_title }}</label>
+            <label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
             <div class="col-sm-5">
             <select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
               <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
