@@ -90,7 +90,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
 				'success' => $this->url->link('checkout/success'),
-				'failed'  => $this->url->link('checkout/failure_pace')
+				'failed'  => $this->url->link('checkout/failure')
 			)
 		);
 	}
