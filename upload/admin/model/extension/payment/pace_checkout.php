@@ -12,7 +12,7 @@ class ModelExtensionPaymentPaceCheckout extends Controller
 				`data` text NOT NULL,
 				PRIMARY KEY `id` (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
-        ");        
+        ");
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "cron` (
             `cron_id` int(11) NOT NULL AUTO_INCREMENT,
             `status` int(6) NOT NULL DEFAULT '0',
@@ -20,7 +20,7 @@ class ModelExtensionPaymentPaceCheckout extends Controller
             `updated_at` datetime NOT NULL,
             PRIMARY KEY (`cron_id`)
           ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
-
+        $this->db->query("TRUNCATE TABLE `oc_cron`");
         $this->db->query("INSERT INTO `oc_cron` (`cron_id`, `created_at`, `updated_at`)
         VALUES
             (1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
