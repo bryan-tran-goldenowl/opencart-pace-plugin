@@ -95,7 +95,8 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'payment_pace_checkout_foreground_color',
 			'payment_pace_checkout_fontsize',
 			'payment_pace_checkout_fallback_widget',
-			'payment_pace_checkout_logo_style'
+			'payment_pace_checkout_logo_style',
+			'payment_pace_checkout_cron'
 		];
 
 
@@ -114,6 +115,22 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$this->response->setOutput($this->load->view('extension/payment/pace_checkout', $data));
 	}
 
+	public function runCron()
+	{
+		$this->load->model('extension/module/cron');
+		$data = $this->model_extension_module_cron->getUser();
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
+		$has_supplied_credentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
+		$is_not_authenticated = (!$has_supplied_credentials ||
+			$_SERVER['PHP_AUTH_USER'] != $data['user_name'] ||
+			$_SERVER['PHP_AUTH_PW']   != $data['password']);
+		if ($is_not_authenticated) {
+			header('HTTP/1.1 401 Authorization Required');
+			header('WWW-Authenticate: Basic realm="Access denied"');
+			exit;
+		}
+		$this->model_extension_module_cron->checkCron();
+	}
 	protected function validate()
 	{
 		if (!$this->user->hasPermission('modify', 'extension/payment/pace_checkout')) {

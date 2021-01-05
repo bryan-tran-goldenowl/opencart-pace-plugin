@@ -15,7 +15,7 @@ $_['entry_order_status_transaction_expired']   = 'Order status when Pace transac
 $_['entry_geo_zone']                           = 'Geo Zone';
 $_['entry_status']                             = 'Enable';
 $_['enable_sandbox']                           = 'Enable Playground';
-$_['pay_mode_title']                           = 'Pay With Pace Mode';
+$_['pay_mode_title']                           = 'Sync order status';
 $_['entry_sort_order']                         = 'Sort Order';
 
 // Help
