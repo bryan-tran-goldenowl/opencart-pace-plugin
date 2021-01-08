@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
-  <name>pace</name>
+  <name>Pace for Opencart</name>
   <version>1.0.0</version>
   <code>1.0.0</code>
-  <author>nguyen</author>
-  <link>localhost.com</link>
+  <author>Pace Enterprise Pte Ltd</author>
+  <link>https://developers.pacenow.co/</link>
 
   <!-- single widget load html -->
   <file path="catalog/view/theme/*/template/product/product.twig" error="log">
@@ -389,6 +389,58 @@
       > </div>
      {% if product.rating %}
      ]]></add>
+    </operation>
+  </file>
+
+  <!-- Admin Orders area -->
+  <file path="admin/language/en-gb/sale/order.php">
+    <operation>
+      <search><![CDATA[$_['text_picklist']              = 'Dispatch Note';]]></search>
+      <add position="after"><![CDATA[$_['text_transaction']      = 'Pace Transaction';]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/model/sale/order.php">
+    <operation>
+      <search><![CDATA[$this->load->model('customer/customer');]]></search>
+      <add position="after"><![CDATA[
+        $transaction_query = $this->db->query("SELECT transaction_id FROM `". DB_PREFIX ."order_transaction` WHERE order_id = '" . (int) $order_id . "'");
+        if ( $transaction_query->num_rows ) {
+          $transaction = $transaction_query->row['transaction_id'];
+        } else {
+          $transaction = '';
+        }
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/model/sale/order.php">
+    <operation>
+      <search><![CDATA['date_added'              => $order_query->row['date_added'],]]></search>
+      <add position="after"><![CDATA[
+        'pace_transaction' => $transaction,
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/controller/sale/order.php">
+    <operation>
+      <search><![CDATA[$this->response->setOutput($this->load->view('sale/order_info', $data));]]></search>
+      <add position="before"><![CDATA[
+        $data['payment_code'] = $order_info['payment_code'];
+        $data['pace_transaction'] = $order_info['pace_transaction'];
+      ]]></add>
+    </operation>
+  </file>
+
+  <file path="admin/view/template/sale/order_info.twig">
+    <operation>
+      <search regex="true"><![CDATA[~(<tr>\s+<td>{+\s?text_affiliate\D+\{\%\s?endif\D+<\/tr>)~]]></search>
+      <add trim="true" offset="1"><![CDATA[
+        <tr> <td>{{ text_affiliate }} {% if affiliate %} (<a href="{{ affiliate }}">{{ affiliate_firstname }} {{ affiliate_lastname }}</a>) {% endif %}</td> <td class="text-right">{{ commission }}</td> <td class="text-center">{% if affiliate %} {% if not commission_total %} <button id="button-commission-add" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_add }}" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button> {% else %} <button id="button-commission-remove" data-loading-text="{{ text_loading }}" data-toggle="tooltip" title="{{ button_commission_remove }}" class="btn btn-danger btn-xs"><i class="fa fa-minus-circle"></i></button> {% endif %} {% else %} <button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-plus-circle"></i></button> {% endif %}</td> </tr>
+
+        {% if payment_code == 'pace_checkout' and pace_transaction %}<tr> <td>{{ text_transaction }}</td> <td class="text-right">{{ pace_transaction }}</td> <td class="text-center"><button disabled="disabled" class="btn btn-success btn-xs"><i class="fa fa-eye"></i></button></td> </tr> {% endif %}
+      ]]></add>
     </operation>
   </file>
 </modification>

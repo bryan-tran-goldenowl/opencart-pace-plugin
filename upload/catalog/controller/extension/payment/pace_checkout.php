@@ -85,7 +85,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return array(
 			'items'		   => [],
 			'amount'	   => $this->cart->getTotal() * 100,
-			'webhookUrl'	=> $url,
+			'webhookUrl'   => $url,
 			'currency'     =>  "SGD",
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
@@ -101,14 +101,14 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		array_walk($items, function ($item, $id) use (&$source) {
 			// get WC_Product item by ID
 			$source_item = array(
-				'itemID' 		 => "$item[product_id]",
-				'itemType'		 => 'qwerqwerqwe',
-				'reference' 	 =>  "$item[product_id]",
-				'name' 			 => $item['name'],
-				'productUrl' 	 =>  $this->url->link('product/product', 'product_id=' . $item['product_id']),
-				'imageUrl' 		 =>	$this->config->get('config_url') . "/" . $item['image'],
-				'quantity' 		 => (int) $item['quantity'],
-				'tags'			 => [""],
+				'itemID'         => "$item[product_id]",
+				'itemType'       => 'qwerqwerqwe',
+				'reference'      => "$item[product_id]",
+				'name'           => $item['name'],
+				'productUrl'     => $this->url->link('product/product', 'product_id=' . $item['product_id']),
+				'imageUrl'       =>	$this->config->get('config_url') . "/" . $item['image'],
+				'quantity'       => (int) $item['quantity'],
+				'tags'           => [""],
 				'unitPriceCents' => (string) $item["total"]
 			);
 			$source['items'][] =  $source_item;
