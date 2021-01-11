@@ -109,8 +109,9 @@ class ModelExtensionModulePace extends Model
 
 	/**
 	 * Get order status based on Pace transaction
-	 * @param  Array|String $transaction
+	 * @param  array|string $transaction
 	 * @return number              
+	 * @throws string
 	 */
 	public function updateOrderStatus($transaction) {
 		try {
@@ -130,8 +131,10 @@ class ModelExtensionModulePace extends Model
 				case 'approved':
 					$order_status = 5;
 					break;
-				default:
+				case 'pending_confirmation':
 					$order_status = 1;
+					break;
+				default:
 					break;
 			}
 			return $order_status;
@@ -489,7 +492,7 @@ class ModelExtensionModulePace extends Model
 		$headers = array();
 		$headers[] = 'Content-Type: text/plain';
 
-		$headers[] = 'Authorization: Basic ' . base64_encode($user['user_name'] . ':' . $user['password']);;
+		$headers[] = 'Authorization: Basic ' . base64_encode($user['user_name'] . ':' . $user['password']);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$result = curl_exec($ch);
