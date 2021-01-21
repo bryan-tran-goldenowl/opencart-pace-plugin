@@ -85,8 +85,8 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return array(
 			'items'		   => [],
 			'amount'	   => $this->cart->getTotal() * 100,
+			'currency'     => $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' ),
 			'webhookUrl'   => $url,
-			'currency'     =>  "SGD",
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
 				'success' => $this->url->link('checkout/success'),
@@ -125,7 +125,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$ch = curl_init();
 
 		$data = $this->model_extension_module_pace->getUser();
-
 
 		curl_setopt($ch, CURLOPT_URL, $data['api'] . '/v1/checkouts');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -19,20 +19,16 @@ class ModelExtensionPaymentPaceCheckout extends Model
 
 		$method_data = array();
 
-		$currencies = array(
+		/**
+		 * Check availabel country and currency base on Pace Plan
+		 * @since 1.0.1
+		 */
+		$this->load->model('extension/module/pace');
+		$isAvailable = $this->model_extension_module_pace->isAvailable( (float) $total );
 
-			'SGD',
-		);
-
-		$data = $this->session->data;
-		if ($data['payment_address']['country'] !== "Singapore") {
-			$status = false;
+		if ( ! $isAvailable ) {
+			return false;
 		}
-		if (!in_array(strtoupper($data['currency']), $currencies)) {
-			$status = false;
-		}
-
-
 
 		if ($status) {
 			$method_data = array(

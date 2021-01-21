@@ -504,4 +504,101 @@ class ModelExtensionModulePace extends Model
 
 		curl_close($ch);
 	}
+
+	/**
+	 * Get Pace plan according Credential
+	 *  
+	 * @throws string
+	 * @return array|object
+	 */
+	public function getPacePlan() {
+		try {
+			$credential = $this->getUser();
+
+			$ch = curl_init();
+			$token = base64_encode( $credential['user_name'] . ':' . $credential['password'] );
+
+			curl_setopt_array( $ch, array(
+				CURLOPT_URL => $credential['api'] . '/v1/checkouts/plans',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => '',
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => 'GET',
+				CURLOPT_HTTPHEADER => array(
+					"Content-Type: text/plain",
+					"authorization: Basic {$token}",
+					"cache-control: no-cache"
+				)
+			) );
+
+			$getPacePlan = json_decode( curl_exec( $ch ) );
+			$error = curl_error( $ch );
+
+			curl_close( $ch );
+
+			if ( $error ) {
+				throw new Exception( $error );
+			}
+
+			if ( isset( $getPacePlan->error ) ) {
+				throw new Exception( $getPacePlan->error->message . '. code: ' . $getPacePlan->correlation_id );
+			}
+
+			return array_shift( $getPacePlan->list );
+		} catch (Exception $e) {
+			$this->log->write( $e->getMessage() );
+			return [];
+		}
+	}
+
+	public function isAvailable( $total ) {
+		try {
+			$getPacePlan = $this->getPacePlan();
+
+			// return false if get pace plan is failed
+			if ( ! $getPacePlan ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			// check country and currency
+			$getStoreCountryID = $this->config->get( 'config_country_id' );
+
+			if ( ! $getStoreCountryID ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			$sqlQuery = sprintf( "SELECT iso_code_2 FROM %s WHERE country_id = %d", DB_PREFIX . 'country', (int) $getStoreCountryID );
+			$getCountryByID = $this->db->query( $sqlQuery );
+
+			if ( ! $getCountryByID->num_rows ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			$countryCode = $getCountryByID->row['iso_code_2'];
+
+			if ( $countryCode !== $getPacePlan->country ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			$getCurrency = $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' );
+
+			if ( ! $getCurrency ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			if ( $getCurrency !== $getPacePlan->currencyCode ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			if ( $total < $getPacePlan->minAmount->actualValue || $total > $getPacePlan->maxAmount->actualValue ) {
+				throw new Exception("Error Processing Request", 1);
+			}
+
+			return true;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
 }

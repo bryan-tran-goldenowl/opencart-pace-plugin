@@ -71,8 +71,18 @@
       <search><![CDATA[$data['analytics'] = array();]]></search>
       <add position="replace"><![CDATA[
           $this->load->model('setting/setting');
-          
+          $this->load->model('extension/module/pace');
+
           $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+          $getPacePlan = $this->model_extension_module_pace->getPacePlan();
+
+          if ( $getPacePlan ) {
+            printf('
+              <script>
+                var pacePlan = %s;
+              </script>
+            ', json_encode( $getPacePlan ) );
+          }
 
           if($setting['payment_pace_checkout_fallback_widget']){
              $this->document->addScript('/catalog/view/javascript/pace/checkout.js');
