@@ -553,7 +553,7 @@ class ModelExtensionModulePace extends Model
 		}
 	}
 
-	public function isAvailable( $total ) {
+	public function isAvailable( $total = null ) {
 		try {
 			$getPacePlan = $this->getPacePlan();
 
@@ -592,11 +592,13 @@ class ModelExtensionModulePace extends Model
 				throw new Exception("Error Processing Request", 1);
 			}
 
-			if ( $total < $getPacePlan->minAmount->actualValue || $total > $getPacePlan->maxAmount->actualValue ) {
-				throw new Exception("Error Processing Request", 1);
+			if ( isset( $total ) && $total > 0 ) {
+				if ( $total < $getPacePlan->minAmount->actualValue || $total > $getPacePlan->maxAmount->actualValue ) {
+					throw new Exception("Error Processing Request", 1);
+				}	
 			}
 
-			return true;
+			return $getPacePlan;
 		} catch (Exception $e) {
 			return false;
 		}

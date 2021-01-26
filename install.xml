@@ -2,7 +2,7 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.0</version>
+  <version>1.0.2-rc01</version>
   <code>1.0.0</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
@@ -70,35 +70,32 @@
     <operation>
       <search><![CDATA[$data['analytics'] = array();]]></search>
       <add position="replace"><![CDATA[
-          $this->load->model('setting/setting');
-          $this->load->model('extension/module/pace');
+        $this->load->model('extension/module/pace');
+        $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+        $isPlanAvailabel = $this->model_extension_module_pace->isAvailable();
 
-          $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
-          $getPacePlan = $this->model_extension_module_pace->getPacePlan();
-
-          if ( $getPacePlan ) {
-            printf('
-              <script>
-                var pacePlan = %s;
-              </script>
-            ', json_encode( $getPacePlan ) );
-          }
-
-          if($setting['payment_pace_checkout_fallback_widget']){
-             $this->document->addScript('/catalog/view/javascript/pace/checkout.js');
-          } else {
-             $this->document->addScript('/catalog/view/javascript/pace/checkout-without-fallback.js');
-          }
-         
-          $this->document->addScript('/catalog/view/javascript/pace/pace-widget.js');
-		      
-                    if($setting['payment_pace_checkout_status'] && !$setting['payment_pace_checkout_status_sandbox']){
-                      $this->document->addScript('https://pay.pacenow.co/pace-pay.js', 'header', true);
-                    } else if($setting['payment_pace_checkout_status_sandbox']){
-                      $this->document->addScript('https://pay-playground.pacenow.co/pace-pay.js', 'header', true);
-                    }
+        if ( $isPlanAvailabel ) {
+          $getPacePlan = $isPlanAvailabel;
           
-     $data['analytics'] = array();
+          // append Pace SDK
+          printf('<script> var pacePlan = %s; </script> ', json_encode( $getPacePlan ) );
+
+          if ( $setting['payment_pace_checkout_fallback_widget'] ) {
+            $this->document->addScript('/catalog/view/javascript/pace/checkout.js');  
+          } else {
+            $this->document->addScript('/catalog/view/javascript/pace/checkout-without-fallback.js'); 
+          }
+
+          $this->document->addScript('/catalog/view/javascript/pace/pace-widget.js');
+
+          if ( $setting['payment_pace_checkout_status'] && !$setting['payment_pace_checkout_status_sandbox'] ) {
+              $this->document->addScript('https://pay.pacenow.co/pace-pay.js', 'header', true);
+          } else if($setting['payment_pace_checkout_status_sandbox']){
+              $this->document->addScript('https://pay-playground.pacenow.co/pace-pay.js', 'header', true);
+          }
+        }
+          
+    $data['analytics'] = array();
      ]]></add>
     </operation>
   </file>
@@ -110,7 +107,18 @@
     <operation>
       <search><![CDATA[$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
-      $data['pace_price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), false); 
+
+      $data['pace_price'] = $this->currency->format(
+        $this->tax->calculate(
+          $product_info['price'], 
+          $product_info['tax_class_id'], 
+          $this->config->get('config_tax')
+        ),
+        $this->session->data['currency'],
+        '',
+        false
+      ); 
+
 		  $this->load->model('setting/setting');
       $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
 		  $data['payment_pace_checkout_product_widget_status'] = $setting['payment_pace_checkout_product_widget_status'];
@@ -130,7 +138,16 @@
       <search><![CDATA[$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
       $data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-      $data['pace_price'] =  $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+      $data['pace_price'] = $this->currency->format(
+        $this->tax->calculate(
+          $product_info['special'], 
+          $product_info['tax_class_id'], 
+          $this->config->get('config_tax')
+        ), 
+        $this->session->data['currency'],
+        '',
+        false
+      );
      ]]></add>
     </operation>
   </file>
@@ -152,7 +169,17 @@
 		  $data['payment_pace_checkout_catalog_primary_color'] = $setting['payment_pace_checkout_catalog_primary_color'];
 		  $data['payment_pace_checkout_catalog_fontsize'] = $setting['payment_pace_checkout_catalog_fontsize'];
 		  $data['payment_pace_checkout_catalog_widget_style'] = $setting['payment_pace_checkout_catalog_widget_style'];
-      $pace_price =  $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+
+      $pace_price = $this->currency->format(
+        $this->tax->calculate(
+          $result['price'], 
+          $result['tax_class_id'], 
+          $this->config->get('config_tax')
+        ), 
+        $this->session->data['currency'],
+        '',
+        false
+      );
      ]]></add>
     </operation>
   </file>
@@ -163,7 +190,17 @@
       <search><![CDATA[	$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
       $special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-      $pace_price =  $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+
+      $pace_price = $this->currency->format(
+        $this->tax->calculate(
+          $result['special'], 
+          $result['tax_class_id'], 
+          $this->config->get('config_tax')
+        ),
+        $this->session->data['currency'],
+        '',
+        false
+      );
      ]]></add>
     </operation>
   </file>
@@ -173,7 +210,16 @@
       <search><![CDATA[	$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
       $special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-      $pace_price =  $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), false);
+      $pace_price = $this->currency->format(
+        $this->tax->calculate(
+          $result['special'], 
+          $result['tax_class_id'], 
+          $this->config->get('config_tax')
+        ),
+        $this->session->data['currency'],
+        '',
+        false
+      );
      ]]></add>
     </operation>
   </file>
@@ -184,8 +230,8 @@
     <operation>
       <search><![CDATA['price'       => $price,]]></search>
       <add position="replace"><![CDATA[
-     'price'       => $price,
-     'pace_price'   => $pace_price,
+     'price'      => $price,
+     'pace_price' => $pace_price,
      ]]></add>
     </operation>
   </file>
@@ -199,7 +245,16 @@
       <search><![CDATA[$price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
     $price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-    $pace_price = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+    $pace_price = $this->currency->format(
+      $this->tax->calculate(
+        $product_info['price'], 
+        $product_info['tax_class_id'], 
+        $this->config->get('config_tax')
+      ), 
+      $this->session->data['currency'],
+      '',
+      false
+    );
      $this->load->model('setting/setting');
       $setting_pace = $this->model_setting_setting->getSetting('payment_pace_checkout');
       $data['payment_pace_checkout_catalog_widget_status'] = $setting_pace['payment_pace_checkout_catalog_widget_status'];
@@ -217,7 +272,16 @@
       <search><![CDATA[$special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);]]></search>
       <add position="replace"><![CDATA[
     $special = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-    $pace_price = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), false);
+    $pace_price = $this->currency->format(
+      $this->tax->calculate(
+        $product_info['special'], 
+        $product_info['tax_class_id'], 
+        $this->config->get('config_tax')
+      ), 
+      $this->session->data['currency'],
+      '',
+      false
+    );
      ]]></add>
     </operation>
   </file>
@@ -227,8 +291,8 @@
     <operation>
       <search><![CDATA['price'       => $price,]]></search>
       <add position="replace"><![CDATA[
-     'price'       => $price,
-     'pace_price'   => $pace_price,
+     'price'      => $price,
+     'pace_price' => $pace_price,
      ]]></add>
     </operation>
   </file>
@@ -362,8 +426,8 @@
     <operation>
       <search><![CDATA['price'       => $price,]]></search>
       <add position="replace"><![CDATA[
-     'price'       => $price,
-     'pace_price'   => $special ? $special : $price,
+     'price'      => $price,
+     'pace_price' => $special ? $special : $price,
      ]]></add>
     </operation>
   </file>
