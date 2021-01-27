@@ -30,12 +30,16 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 			if ($this->session->data['payment_method']['code'] == 'pace_checkout') {
 				$data = $this->session->data;
-				$result = [];
 				$order = $this->model_extension_module_pace->getOrder($this->session->data['order_id']);
+
+				if ( ! $order ) {
+					throw new \Exception( 'Cannot get the order.' );
+				}
+
 				$transaction = $this->model_extension_module_pace->getOrderTransaction($this->session->data['order_id']);
 
 				if (!$transaction) {
-					$result = $this->handleCreateTransaction();
+					$result = $this->handleCreateTransaction( $order );
 					$transaction = json_decode($result, true);
 					// attach order id to transaction
 					$transaction['order_id'] = (int) $this->session->data['order_id'];
@@ -75,7 +79,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$this->db->query( $_sql );
 	}
 
-	private function setCart()
+	private function setCart( $order )
 	{
 		$url = ($this->request->server['HTTPS'] ? HTTPS_SERVER : HTTP_SERVER)
 		. "admin/index.php?route=extension/payment/pace_checkout/runCron";
@@ -84,7 +88,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$data = $this->session->data;
 		return array(
 			'items'		   => [],
-			'amount'	   => $this->cart->getTotal() * 100,
+			'amount'	   => $order['total'] * 100,
 			'currency'     => $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' ),
 			'webhookUrl'   => $url,
 			'referenceID'  => (string) $data['order_id'],
@@ -117,9 +121,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return $source;
 	}
 
-	private function handleCreateTransaction()
+	private function handleCreateTransaction( $order )
 	{
-		$cart  = $this->setCart();
+		$cart  = $this->setCart( $order );
 		$this->get_source_order_items($this->cart->getProducts(), $cart);
 
 		$ch = curl_init();
