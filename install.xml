@@ -71,6 +71,7 @@
       <search><![CDATA[$data['analytics'] = array();]]></search>
       <add position="replace"><![CDATA[
         $this->load->model('extension/module/pace');
+          $this->load->model('setting/setting');
         $setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
         $isPlanAvailabel = $this->model_extension_module_pace->isAvailable();
 
