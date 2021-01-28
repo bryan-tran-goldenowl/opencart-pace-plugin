@@ -5,7 +5,10 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	{
 
 		$this->load->model('setting/setting');
-		$setting                                           = $this->model_setting_setting->getSetting('payment_pace_checkout');
+		$this->load->model('extension/module/pace');
+		$order = $this->model_extension_module_pace->getOrder( $this->session->data['order_id'] );
+		$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+
 		$data['payment_pace_checkout_widget_status']       = $setting['payment_pace_checkout_widget_status'];
 		$data['payment_pace_checkout_primary_color']       = $setting['payment_pace_checkout_primary_color'];
 		$data['payment_pace_checkout_second_color']        = $setting['payment_pace_checkout_second_color'];
@@ -13,7 +16,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$data['payment_pace_checkout_background_color']    = $setting['payment_pace_checkout_background_color'];
 		$data['payment_pace_checkout_foreground_color']    = $setting['payment_pace_checkout_foreground_color'];
 		$data['payment_pace_checkout_fontsize']            = $setting['payment_pace_checkout_fontsize'];
-		$data['price']                                     = $this->cart->getTotal();
+		$data['price']                                     = (float) $order['total'];
 
 		return $this->load->view('extension/payment/pace_checkout', $data);
 	}
