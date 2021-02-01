@@ -25,6 +25,16 @@ class ModelExtensionPaymentPaceCheckout extends Controller
         VALUES
             (1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
         ");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "order_status_history` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `order_id` int(11) NOT NULL ,
+            `order_status_id` int(6) NOT NULL DEFAULT '0',
+            `change_by` text NOT NULL,
+            `created_at` datetime NOT NULL,
+            `updated_at` datetime NOT NULL,
+            PRIMARY KEY (`id`)
+          ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
     }
 
     public function uninstall()

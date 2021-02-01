@@ -603,4 +603,14 @@ class ModelExtensionModulePace extends Model
 			return false;
 		}
 	}
+
+	public function track_order_status_change_by($order_id, $status_id)
+	{
+		$change_by = 'system';
+		$data = $this->session->data;
+		if(isset($data['api_id'])){
+			$change_by = 'admin';
+		}
+		$this->db->query("INSERT INTO " . DB_PREFIX . "order_status_history SET order_id = '" . (int) $order_id . "', order_status_id = '" . (int) $status_id . "', change_by = '" . $change_by  . "', created_at = NOW(), updated_at = NOW()");		
+	}
 }
