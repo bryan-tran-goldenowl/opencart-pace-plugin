@@ -71,6 +71,8 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'payment_pace_checkout_status_sandbox',
 			'payment_pace_checkout_order_status_transaction_cancelled',
 			'payment_pace_checkout_order_status_transaction_expired',
+			'payment_pace_checkout_order_status_transaction_pending',
+			'payment_pace_checkout_order_status_transaction_approved',
 			'payment_pace_checkout_username',
 			'payment_pace_checkout_password',
 			'payment_pace_checkout_username_sandbox',

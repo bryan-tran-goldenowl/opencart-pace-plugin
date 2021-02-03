@@ -12,6 +12,9 @@ $_['text_pace_checkout']                       = '<img src="view/image/payment/p
 $_['entry_total']                              = 'Total';
 $_['entry_order_status_transaction_cancelled'] = 'Order status when Pace transaction is cancelled';
 $_['entry_order_status_transaction_expired']   = 'Order status when Pace transaction has expired';
+$_['entry_order_status_transaction_pending']   = 'Pending Status';
+$_['entry_order_status_transaction_approved']  = 'Approved Status';
+
 $_['entry_geo_zone']                           = 'Geo Zone';
 $_['entry_status']                             = 'Enable';
 $_['enable_sandbox']                           = 'Enable Playground';

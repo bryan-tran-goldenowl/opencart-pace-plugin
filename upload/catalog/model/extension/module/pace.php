@@ -116,7 +116,6 @@ class ModelExtensionModulePace extends Model
 	public function updateOrderStatus($transaction) {
 		try {
 			// load Pace settings
-			$this->load->model('setting/setting');
 			$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
 			$statuses = is_array( $transaction ) ? $transaction['status'] : $transaction;
 			$order_status = null;
@@ -129,14 +128,15 @@ class ModelExtensionModulePace extends Model
 					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_expired'];
 					break;
 				case 'approved':
-					$order_status = 5;
+					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_approved'];
 					break;
 				case 'pending_confirmation':
-					$order_status = 1;
+					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_pending'];
 					break;
 				default:
 					break;
 			}
+
 			return $order_status;
 		} catch (Exception $e) {
 			throw new \Exception($e->getMessage());
@@ -519,14 +519,14 @@ class ModelExtensionModulePace extends Model
 			$token = base64_encode( $credential['user_name'] . ':' . $credential['password'] );
 
 			curl_setopt_array( $ch, array(
-				CURLOPT_URL => $credential['api'] . '/v1/checkouts/plans',
+				CURLOPT_URL            => $credential['api'] . '/v1/checkouts/plans',
+				CURLOPT_TIMEOUT        => 30,
+				CURLOPT_ENCODING       => '',
+				CURLOPT_MAXREDIRS      => 10,
+				CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST  => 'GET',
 				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => '',
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 30,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => 'GET',
-				CURLOPT_HTTPHEADER => array(
+				CURLOPT_HTTPHEADER     => array(
 					"Content-Type: text/plain",
 					"authorization: Basic {$token}",
 					"cache-control: no-cache"
@@ -546,7 +546,7 @@ class ModelExtensionModulePace extends Model
 				throw new Exception( $getPacePlan->error->message . '. code: ' . $getPacePlan->correlation_id );
 			}
 
-			return array_shift( $getPacePlan->list );
+			return $getPacePlan->list;
 		} catch (Exception $e) {
 			$this->log->write( $e->getMessage() );
 			return [];
@@ -578,27 +578,32 @@ class ModelExtensionModulePace extends Model
 
 			$countryCode = $getCountryByID->row['iso_code_2'];
 
-			if ( $countryCode !== $getPacePlan->country ) {
-				throw new Exception("Error Processing Request", 1);
+			$listAvailableCurrencies = [];
+
+			foreach ( $getPacePlan as $plan ) {
+				$listAvailableCurrencies[$plan->currencyCode] = $plan;
 			}
 
 			$getCurrency = $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' );
+			$pacePlanFollowCurrency = $listAvailableCurrencies[$getCurrency];
 
-			if ( ! $getCurrency ) {
-				throw new Exception("Error Processing Request", 1);
+			// check plan country
+			if ( $pacePlanFollowCurrency->country !== $countryCode ) {
+				throw new Exception( "Pace doesn't support the client country.", 405 );
 			}
 
-			if ( $getCurrency !== $getPacePlan->currencyCode ) {
-				throw new Exception("Error Processing Request", 1);
+			// check plan currency
+			if ( ! in_array( $getCurrency, array_keys( $listAvailableCurrencies ) ) ) {
+				throw new Exception( "Pace doesn't support the client currency.", 405 );
 			}
 
 			if ( isset( $total ) && $total > 0 ) {
-				if ( $total < $getPacePlan->minAmount->actualValue || $total > $getPacePlan->maxAmount->actualValue ) {
-					throw new Exception("Error Processing Request", 1);
+				if ( $total < $pacePlanFollowCurrency->minAmount->actualValue || $total > $pacePlanFollowCurrency->maxAmount->actualValue ) {
+					throw new Exception( "The price of the order is out of price range allows.", 405 );
 				}	
 			}
 
-			return $getPacePlan;
+			return $pacePlanFollowCurrency;
 		} catch (Exception $e) {
 			return false;
 		}

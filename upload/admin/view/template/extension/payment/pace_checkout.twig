@@ -101,9 +101,9 @@ window.onload = function(){
             </div>
           </div>
 
+          {# Start Manage unpaid orders #}
           <h3>Manage Unpaid Orders</h3>
           <p>Manage your unpaid orders by choosing the status you want them to have when their corresponding Pace transactions have changed status.</p>
-
           <div class="form-group">
             <label for="input-order-status-transaction-cancel" class="col-sm-2 control-label">{{ entry_order_status_transaction_cancelled }}</label>
             <div class="col-sm-5">
@@ -114,7 +114,6 @@ window.onload = function(){
               </select>
             </div>
           </div>
-
           <div class="form-group">
             <label for="input-order-status-transaction-expire" class="col-sm-2 control-label">{{ entry_order_status_transaction_expired }}</label>
             <div class="col-sm-5">
@@ -125,7 +124,31 @@ window.onload = function(){
               </select>
             </div>
           </div>
+          {# End Manage unpaid orders #}
 
+          {# Start Manage status orders #}
+          <h3>Manage Status Orders</h3>
+          <div class="form-group">
+            <label for="input-order-status-transaction-pending" class="col-sm-2 control-label">{{ entry_order_status_transaction_pending }}</label>
+            <div class="col-sm-5">
+              <select name="payment_pace_checkout_order_status_transaction_pending" id="input-order-status-transaction-pending" class="form-control">
+                {% for order_status in order_statuses %}
+                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_pending %} selected="selected" {% endif %} >{{ order_status.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="input-order-status-transaction-approved" class="col-sm-2 control-label">{{ entry_order_status_transaction_approved }}</label>
+            <div class="col-sm-5">
+              <select name="payment_pace_checkout_order_status_transaction_approved" id="input-order-status-transaction-approved" class="form-control">
+                {% for order_status in order_statuses %}
+                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_approved %} selected="selected" {% endif %} >{{ order_status.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          {# End Manage status orders #}
 
 <h3> API Credentials </h3>
 <p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
