@@ -25,13 +25,13 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	{
 		$errors = array();
 
-		try {
+		
 			$this->load->model('extension/module/pace');
 			$this->load->model('checkout/order');
 			$this->load->model('setting/setting');
 			$this->load->language('extension/payment/pace_checkout');
-
-			if ($this->session->data['payment_method']['code'] == 'pace_checkout') {
+			try {
+			if (isset($this->session->data['payment_method']['code'])  && $this->session->data['payment_method']['code'] == 'pace_checkout') {
 				$data = $this->session->data;
 				$order = $this->model_extension_module_pace->getOrder($this->session->data['order_id']);
 
@@ -48,8 +48,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 					$transaction['order_id'] = (int) $this->session->data['order_id'];
 					
 					if ( isset( $transaction['error'] ) ) {
-						$errors['error'] = sprintf($this->language->get('create_transaction_error'), $transaction['correlation_id']);
-						throw new \Exception("Can not create transaction");
+						throw new \Exception(sprintf($this->language->get('create_transaction_error'), $transaction['correlation_id']));
 					}
 
 					$order_status = (int) $this->model_extension_module_pace->updateOrderStatus($transaction); /*update orders status based on Pace transaction*/
@@ -61,14 +60,17 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
 				$transaction['redirect_success'] = $this->url->link('checkout/success');
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
+			}else {
+				throw new \Exception('Session is expired please refresh a page');
 			}
+
 
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($transaction));
 		} catch (Exception $e) {
-			// throw new \Exception( $e->getMessage );
+			$error['error']  = $e->getMessage();
 			$this->response->addHeader('Content-Type: application/json');
-			$this->response->setOutput(json_encode($errors));
+			$this->response->setOutput(json_encode($error));
 		}
 	}
 
