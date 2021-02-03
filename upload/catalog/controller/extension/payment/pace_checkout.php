@@ -59,6 +59,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 				$setting                         = $this->model_setting_setting->getSetting('payment_pace_checkout');
 				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
+				$transaction['pace_approved']	 = $setting['payment_pace_checkout_order_status_transaction_approved'];
 				$transaction['redirect_success'] = $this->url->link('checkout/success');
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
 			}
@@ -75,9 +76,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	public function updateOrderStatus() {
 		extract( $_GET ); /* retrieve get params */
 
-		$this->load->model( 'extension/module/pace' );
-		$statuses = $this->model_extension_module_pace->updateOrderStatus( $status );
-		$_sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $statuses, $orderID );
+		$_sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $status, $orderID );
 		// do update
 		$this->db->query( $_sql );
 	}
