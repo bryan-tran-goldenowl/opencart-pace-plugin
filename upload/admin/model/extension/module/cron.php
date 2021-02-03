@@ -115,13 +115,16 @@ class ModelExtensionModuleCron extends Model
 	private function check_order_manually_update($order, $pace_status = null, $transaction_id = 0)
 	{
 
+		$this->load->model('setting/setting');
+		$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
+
 		if ($pace_status == "pending_confirmation" && ($order['order_status_id'] ==  CANCELED_STATUS || $order['order_status_id'] == FAILED_STATUS)) {
 
 			$this->cancelApi($transaction_id);
 			return false;
 		}
 
-		if ($order['order_status_id'] == PENDING_STATUS) {
+		if ($order['order_status_id'] ==  $setting['payment_pace_checkout_order_status_transaction_pending']) {
 			return true;
 		}
 
@@ -172,10 +175,6 @@ class ModelExtensionModuleCron extends Model
 			$order = $this->getOrder($pace_transaction['referenceID']);
 
 			if ($order) {
-				if ($pace_transaction['transactionID'] == "SGT000003202") {
-					error_log("enter transaction");
-				}
-
 				if ($order['payment_code'] == "pace_checkout") {
 					if ($this->check_order_manually_update($order, $pace_transaction['status'], $pace_transaction['transactionID'])) {
 						switch ($pace_transaction['status']) {
@@ -187,18 +186,18 @@ class ModelExtensionModuleCron extends Model
 
 							case 'pending_confirmation':
 								if ($order['order_status_id'] != 1) {
-									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], 1);
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], (int) $setting['payment_pace_checkout_order_status_transaction_pending']);
 								}
 								break;
 							case 'approved':
 								if ($order['order_status_id'] != 5) {
-									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], 5);
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], (int) $setting['payment_pace_checkout_order_status_transaction_approved']);
 								}
 								break;
 
 							case 'expired':
 								if ($order['order_status_id']() != 14) {
-									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], $setting['payment_pace_checkout_order_status_transaction_expired']);
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], (int) $setting['payment_pace_checkout_order_status_transaction_expired']);
 								}
 								break;
 						}
