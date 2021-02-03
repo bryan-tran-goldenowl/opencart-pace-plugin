@@ -1,4 +1,8 @@
 <?php
+const PENDING_STATUS = 1;
+const CANCELED_STATUS = 7;
+const COMPLETE_STATUS = 5;
+const FAILED_STATUS = 10;
 class ModelExtensionModuleCron extends Model
 {
 
@@ -44,16 +48,12 @@ class ModelExtensionModuleCron extends Model
 		return [];
 	}
 
-	private function getListOrder()
+	private function callPaceApi($url, $params = [])
 	{
 
 		$data = $this->getUser();
-		$params = [
-			"from" =>  date('yy-m-01'),
-			"to"	=> date('yy-m-d')
-		];
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $data['api'] . '/v1/checkouts/list');
+		curl_setopt($ch, CURLOPT_URL, $data['api'] . $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -64,11 +64,42 @@ class ModelExtensionModuleCron extends Model
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$result = curl_exec($ch);
+		$err = curl_error($ch);
+
+		if ($err) {
+			error_log('Error Response: ' . print_r($err, true) . PHP_EOL . PHP_EOL . 'Failed request: ' . print_r(
+				array(
+					'params'     => json_encode($params),
+					'request' => $data['api'] . $url,
+				),
+				true
+			));
+			throw new Exception('There was a problem connecting to the Pace API');
+		}
 		$data = json_decode($result, true);
+
+		return $data;
+	}
+
+	private function getListOrder()
+	{
+		$params = [
+			"from" =>  date('Y-m-d', strtotime("-1 weeks")),
+			"to"    => date('Y-m-d')
+		];
+
+		$data = $this->callPaceApi('/v1/checkouts/list', $params);
+
+
 		if ($data['items']) {
 			$this->compareJob($data['items']);
 		}
-		$result = curl_exec($ch);
+	}
+
+	private function cancelApi($transaction_id)
+	{
+
+		$this->callPaceApi('/v1/checkouts/' . $transaction_id . '/cancel');
 	}
 
 
@@ -80,6 +111,45 @@ class ModelExtensionModuleCron extends Model
 		$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int) $order_id . "', order_status_id = '" . (int) $status . "', notify = '" . (int) $notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
 	}
 
+
+	private function check_order_manually_update($order, $pace_status = null, $transaction_id = 0)
+	{
+
+		if ($pace_status == "pending_confirmation" && ($order['order_status_id'] ==  CANCELED_STATUS || $order['order_status_id'] == FAILED_STATUS)) {
+
+			$this->cancelApi($transaction_id);
+			return false;
+		}
+
+		if ($order['order_status_id'] == PENDING_STATUS) {
+			return true;
+		}
+
+
+
+		if ($order['order_status_id']  != CANCELED_STATUS && $order['order_status_id']  != FAILED_STATUS) {
+			return false;
+		}
+
+		$last_status = $this->get_last_order_status($order['order_id']);
+		return isset($last_status['change_by']) && $last_status['change_by'] == "system";
+	}
+
+	private function get_last_order_status($order_id)
+	{
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_status_history` WHERE order_id = '" . (int) $order_id . "' ORDER BY id DESC LIMIT 1");
+		if ($query->num_rows) {
+			if (isset($query->row['change_by'])) {
+				return [
+					'change_by' => $query->row['change_by'],
+
+				];
+			}
+		}
+		return [];
+	}
+
 	private function compareJob($data)
 	{
 
@@ -88,39 +158,50 @@ class ModelExtensionModuleCron extends Model
 		$orders = [];
 
 		foreach ($data as $key => $transaction) {
+			usort($transaction, function ($a, $b) {
+				return filter_var($a->transactionID, FILTER_SANITIZE_NUMBER_INT)  -  filter_var($b->transactionID, FILTER_SANITIZE_NUMBER_INT) > 0;
+			});
+
 			foreach ($transaction  as $value) {
 				$orders[$value['referenceID']] = $value;
 			}
 		}
 
-		foreach ($orders as $key => $value) {
-			$order = $this->getOrder($value['referenceID']);
+
+		foreach ($orders as $key => $pace_transaction) {
+			$order = $this->getOrder($pace_transaction['referenceID']);
+
 			if ($order) {
+				if ($pace_transaction['transactionID'] == "SGT000003202") {
+					error_log("enter transaction");
+				}
 
 				if ($order['payment_code'] == "pace_checkout") {
-					switch ($value['status']) {
-						case 'cancelled':
-							if ($order['order_status_id'] != 7) {
-								$this->handleUpdateOrderStatus($value['referenceID'], (int) $setting['payment_pace_checkout_order_status_transaction_cancelled']);
-							}
-							break;
+					if ($this->check_order_manually_update($order, $pace_transaction['status'], $pace_transaction['transactionID'])) {
+						switch ($pace_transaction['status']) {
+							case 'cancelled':
+								if ($order['order_status_id'] != 7) {
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], (int) $setting['payment_pace_checkout_order_status_transaction_cancelled']);
+								}
+								break;
 
-						case 'pending_confirmation':
-							if ($order['order_status_id'] != 1) {
-								$this->handleUpdateOrderStatus($value['referenceID'], 1);
-							}
-							break;
-						case 'approved':
-							if ($order['order_status_id'] != 5) {
-								$this->handleUpdateOrderStatus($value['referenceID'], 5);
-							}
-							break;
+							case 'pending_confirmation':
+								if ($order['order_status_id'] != 1) {
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], 1);
+								}
+								break;
+							case 'approved':
+								if ($order['order_status_id'] != 5) {
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], 5);
+								}
+								break;
 
-						case 'expired':
-							if ($order['order_status_id']() != 14) {
-								$this->handleUpdateOrderStatus($value['referenceID'], $setting['payment_pace_checkout_order_status_transaction_expired']);
-							}
-							break;
+							case 'expired':
+								if ($order['order_status_id']() != 14) {
+									$this->handleUpdateOrderStatus($pace_transaction['referenceID'], $setting['payment_pace_checkout_order_status_transaction_expired']);
+								}
+								break;
+						}
 					}
 				}
 			}

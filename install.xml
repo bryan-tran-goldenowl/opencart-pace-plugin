@@ -585,5 +585,16 @@
       ]]></add>
     </operation>
   </file>
+
+   <file path="catalog/model/checkout/order.php">
+    <operation>
+      <search><![CDATA[$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");]]></search>
+      <add position="after"><![CDATA[
+        $this->load->model('extension/module/pace');
+			$this->model_extension_module_pace->track_order_status_change_by($order_id, $order_status_id , 'user');
+      ]]></add>
+    </operation>
+  </file>
+
 </modification>
 
