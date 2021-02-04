@@ -125,7 +125,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 	private function handleCreateTransaction( $order )
 	{
-		$cart  = $this->setCart( $order );
+		$cart = $this->setCart( $order );
 		$this->get_source_order_items($this->cart->getProducts(), $cart);
 
 		$ch = curl_init();

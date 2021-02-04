@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.4-rc01</version>
-  <code>1.0.4-rc01</code>
+  <version>1.0.4-rc02</version>
+  <code>1.0.4-rc02</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -27,9 +27,7 @@
   </file>
 
   <!-- multiple widget load html -->
-
-
-<file path="catalog/view/theme/*/template/product/category.twig" error="log">
+  <file path="catalog/view/theme/*/template/product/category.twig" error="log">
     <operation>
       <search><![CDATA[{% if product.rating %}]]></search>
       <add position="replace"><![CDATA[
@@ -41,13 +39,36 @@
       data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'
       style='{{payment_pace_checkout_catalog_widget_style}}'
       > </div>
-     {% if product.rating %}
-     ]]></add>
+      {% if product.rating %}
+      ]]></add>
     </operation>
   </file>
 
+  <!-- processing order when paying susscessfully -->
+  <file path="catalog/controller/checkout/success.php" error="log">
+    <operation>
+      <search><![CDATA[if (isset($this->session->data['order_id'])) {]]></search>
+      <add position="after">
+        <![CDATA[
+          $order_id = $this->session->data['order_id'];
+          $transactionId = $_GET['transactionId'];
+          $merchantReferenceId = $_GET['merchantReferenceId'];
 
-<file path="catalog/view/theme/*/template/extension/module/featured.twig" error="log">
+          if ( $order_id == $merchantReferenceId ) {
+            $this->load->model('setting/setting');
+            $pace_settings = $this->model_setting_setting->getSetting('payment_pace_checkout');
+            $approved_status = (int) $pace_settings['payment_pace_checkout_order_status_transaction_approved'];
+
+            // update order status
+            $sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $approved_status, $order_id );
+            $this->db->query( $sql );
+          }
+        ]]>
+      </add>
+    </operation>
+  </file>
+
+  <file path="catalog/view/theme/*/template/extension/module/featured.twig" error="log">
     <operation>
       <search><![CDATA[<div class="button-group">]]></search>
       <add position="replace"><![CDATA[
