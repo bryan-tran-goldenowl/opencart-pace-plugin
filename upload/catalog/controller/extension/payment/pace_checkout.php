@@ -6,7 +6,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 		$this->load->model('setting/setting');
 		$this->load->model('extension/module/pace');
-		$order = $this->model_extension_module_pace->getOrder( $this->session->data['order_id'] );
+		$order = $this->model_extension_module_pace->getOrder($this->session->data['order_id']);
 		$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
 
 		$data['payment_pace_checkout_widget_status']       = $setting['payment_pace_checkout_widget_status'];
@@ -25,29 +25,29 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	{
 		$errors = array();
 
-		
-			$this->load->model('extension/module/pace');
-			$this->load->model('checkout/order');
-			$this->load->model('setting/setting');
-			$this->load->language('extension/payment/pace_checkout');
-			try {
+
+		$this->load->model('extension/module/pace');
+		$this->load->model('checkout/order');
+		$this->load->model('setting/setting');
+		$this->load->language('extension/payment/pace_checkout');
+		try {
 			if (isset($this->session->data['payment_method']['code'])  && $this->session->data['payment_method']['code'] == 'pace_checkout') {
 				$data = $this->session->data;
 				$order = $this->model_extension_module_pace->getOrder($this->session->data['order_id']);
 
-				if ( ! $order ) {
-					throw new \Exception( 'Cannot get the order.' );
+				if (!$order) {
+					throw new \Exception('Cannot get the order.');
 				}
 
 				$transaction = $this->model_extension_module_pace->getOrderTransaction($this->session->data['order_id']);
 
 				if (!$transaction) {
-					$result = $this->handleCreateTransaction( $order );
+					$result = $this->handleCreateTransaction($order);
 					$transaction = json_decode($result, true);
 					// attach order id to transaction
 					$transaction['order_id'] = (int) $this->session->data['order_id'];
-					
-					if ( isset( $transaction['error'] ) ) {
+
+					if (isset($transaction['error'])) {
 						throw new \Exception(sprintf($this->language->get('create_transaction_error'), $transaction['correlation_id']));
 					}
 
@@ -61,7 +61,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 				$transaction['pace_approved']	 = isset($setting['payment_pace_checkout_order_status_transaction_approved']) ? $setting['payment_pace_checkout_order_status_transaction_approved'] : 5;
 				$transaction['redirect_success'] = $this->url->link('checkout/success');
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
-			}else {
+			} else {
 				throw new \Exception('Session is expired please refresh a page');
 			}
 
@@ -75,25 +75,26 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		}
 	}
 
-	public function updateOrderStatus() {
-		extract( $_GET ); /* retrieve get params */
+	public function updateOrderStatus()
+	{
+		extract($_GET); /* retrieve get params */
 
-		$_sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $status, $orderID );
+		$_sql = sprintf("UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $status, $orderID);
 		// do update
-		$this->db->query( $_sql );
+		$this->db->query($_sql);
 	}
 
-	private function setCart( $order )
+	private function setCart($order)
 	{
 		$url = ($this->request->server['HTTPS'] ? HTTPS_SERVER : HTTP_SERVER)
-		. "admin/index.php?route=extension/payment/pace_checkout/runCron";
+			. "admin/index.php?route=extension/payment/pace_checkout/runCron";
 		$user = $this->model_extension_module_pace->getUser();
-		$url = preg_replace("/([http|https]:\/\/)/","$1$user[user_name]:$user[password]@" ,$url);
+		$url = preg_replace("/([http|https]:\/\/)/", "$1$user[user_name]:$user[password]@", $url);
 		$data = $this->session->data;
 		return array(
 			'items'		   => [],
 			'amount'	   => $order['total'] * 100,
-			'currency'     => $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' ),
+			'currency'     => $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get('config_currency'),
 			'webhookUrl'   => $url,
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
@@ -125,9 +126,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return $source;
 	}
 
-	private function handleCreateTransaction( $order )
+	private function handleCreateTransaction($order)
 	{
-		$cart  = $this->setCart( $order );
+		$cart  = $this->setCart($order);
 		$this->get_source_order_items($this->cart->getProducts(), $cart);
 
 		$ch = curl_init();
