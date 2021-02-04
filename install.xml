@@ -324,8 +324,13 @@
     {
 
         $this->load->model('extension/module/pace');
-        $order_id = $this->session->data['order_id'];
+        $order_id = isset($this->session->data['order_id']) ? $this->session->data['order_id'] : null;
 
+        if (!$order_id) {
+            $url = $this->url->link('common/home', '', true);
+            header("Location: $url");
+            die();
+        }
         $user = $this->model_extension_module_pace->getUser();
         $transaction = $this->model_extension_module_pace->getOrderTransaction($order_id) ? json_decode($this->model_extension_module_pace->getOrderTransaction($order_id)['data'], true) : [];
         if (!$transaction) {
