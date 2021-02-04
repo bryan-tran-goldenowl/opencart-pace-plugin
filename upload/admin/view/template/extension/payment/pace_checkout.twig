@@ -1,458 +1,468 @@
 <style>
-button.none-border-active:focus, button.none-border-active:active:focus, button.none-border-active.active:focus{
-    outline:none;
-    box-shadow:none;
-}
+	button.none-border-active:focus,
+	button.none-border-active:active:focus,
+	button.none-border-active.active:focus {
+		outline: none;
+		box-shadow: none;
+	}
 
-.display-flex{
-  display: flex;
-  align-items: center;
-}
+	.display-flex {
+		display: flex;
+		align-items: center;
+	}
 
-.select-pace-mode{
-    padding: 8px 13px;
-    width: 100%
-}
+	.select-pace-mode {
+		padding: 8px 13px;
+		width: 100%
+	}
 </style>
 
 <script>
 
-window.onload = function(){
-  
-  selectors = [
-    '#checkbox-enable', 
-    '#checkbox-enable-sandbox',
-    '#checkbox-enable-product',
-    '#checkbox-enable-catalog',
-    '#checkbox-enable-checkout',
-    '#checkbox-enable-fallback']
+	window.onload = function () {
 
-    selectors.map(selector => {
-      const checkbox =  document.querySelector(selector);
-      checkbox.addEventListener('change',(event) =>{
-      event.target.value = event.target.checked ? 1 : 0
-  })
-  
-    })
-  
+selectors = [
+'#checkbox-enable',
+'#checkbox-enable-sandbox',
+'#checkbox-enable-product',
+'#checkbox-enable-catalog',
+'#checkbox-enable-checkout',
+'#checkbox-enable-fallback'
+]
+
+selectors.map(selector => {
+const checkbox = document.querySelector(selector);
+checkbox.addEventListener('change', (event) => {
+event.target.value = event.target.checked ? 1 : 0
+})
+
+})
+
 }
 </script>
 
 {{ header }}{{ column_left }}
 <div id="content">
-  <div class="page-header">
-    <div class="container-fluid">
-      <div class="pull-right">
-        <button type="submit" form="form-payment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
-        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
-      <h1>{{ heading_title }}</h1>
-      <ul class="breadcrumb">
-        {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-  <div class="container-fluid">
-    {% if error_warning %}
-    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    {% endif %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
-      </div>
-      <div class="panel-body">
-        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment" class="form-horizontal">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="pull-right">
+				<button type="submit" form="form-payment" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary">
+					<i class="fa fa-save"></i>
+				</button>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default">
+					<i class="fa fa-reply"></i>
+				</a>
+			</div>
+			<h1>{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+					<li>
+						<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="container-fluid">
+		{% if error_warning %}
+			<div class="alert alert-danger alert-dismissible">
+				<i class="fa fa-exclamation-circle"></i>
+				{{ error_warning }}
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					<i class="fa fa-pencil"></i>
+					{{ text_edit }}</h3>
+			</div>
+			<div class="panel-body">
+				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment" class="form-horizontal">
 
-              <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_status %}
-              <input type="checkbox" checked id="checkbox-enable" name="payment_pace_checkout_status" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable" name="payment_pace_checkout_status" value="0" />
-                {% endif %}
-            </div>
-          </div>
-
-
-             <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ enable_sandbox }}</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_status_sandbox %}
-              <input type="checkbox" checked id="checkbox-enable-sandbox" name="payment_pace_checkout_status_sandbox" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable-sandbox" name="payment_pace_checkout_status_sandbox" value="0" />
-                {% endif %}
-            </div>
-          </div>
-
-         
-
-             <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ pay_mode_title }}</label>
-            <div class="col-sm-5">
-            <select class="select-pace-mode" value="{{payment_pace_checkout_pace_mode}}" name="payment_pace_checkout_pace_mode">
-              <option {{ payment_pace_checkout_pace_mode == '1' ? 'selected' : ''}} value="1">Popup</option>
-              <option {{ payment_pace_checkout_pace_mode == '2' ? 'selected' : ''}} value="2">Redirect</option>
-            </select>
-            </div>
-          </div>
-
-          {# Start Manage unpaid orders #}
-          <h3>Manage Unpaid Orders</h3>
-          <p>Manage your unpaid orders by choosing the status you want them to have when their corresponding Pace transactions have changed status.</p>
-          <div class="form-group">
-            <label for="input-order-status-transaction-cancel" class="col-sm-2 control-label">{{ entry_order_status_transaction_cancelled }}</label>
-            <div class="col-sm-5">
-              <select name="payment_pace_checkout_order_status_transaction_cancelled" id="input-order-status-transaction-cancel" class="form-control">
-                {% for order_status in order_statuses_unpaid %}
-                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_cancelled %} selected="selected" {% endif %} >{{ order_status.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="input-order-status-transaction-expire" class="col-sm-2 control-label">{{ entry_order_status_transaction_expired }}</label>
-            <div class="col-sm-5">
-              <select name="payment_pace_checkout_order_status_transaction_expired" id="input-order-status-transaction-expire" class="form-control">
-                {% for order_status in order_statuses_unpaid %}
-                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_expired %} selected="selected" {% endif %} >{{ order_status.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          {# End Manage unpaid orders #}
-
-          {# Start Manage status orders #}
-          <h3>Manage Status Orders</h3>
-          <div class="form-group">
-            <label for="input-order-status-transaction-pending" class="col-sm-2 control-label">{{ entry_order_status_transaction_pending }}</label>
-            <div class="col-sm-5">
-              <select name="payment_pace_checkout_order_status_transaction_pending" id="input-order-status-transaction-pending" class="form-control">
-                {% for order_status in order_statuses %}
-                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_pending %} selected="selected" {% endif %} >{{ order_status.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="input-order-status-transaction-approved" class="col-sm-2 control-label">{{ entry_order_status_transaction_approved }}</label>
-            <div class="col-sm-5">
-              <select name="payment_pace_checkout_order_status_transaction_approved" id="input-order-status-transaction-approved" class="form-control">
-                {% for order_status in order_statuses %}
-                  <option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_approved %} selected="selected" {% endif %} >{{ order_status.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          {# End Manage status orders #}
-
-<h3> API Credentials </h3>
-<p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
- <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Client ID</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_username %}
-              <input name="payment_pace_checkout_username" class="form-control" type="text" value="{{ payment_pace_checkout_username  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_username" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-               <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Client Secret</label>
-            <div class="col-sm-5">
-             {% if payment_pace_checkout_password %}
-              <input name="payment_pace_checkout_password" class="form-control" type="password" value="{{ payment_pace_checkout_password  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_password" class="form-control" type="password" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_status %}
+								<input type="checkbox" checked id="checkbox-enable" name="payment_pace_checkout_status" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable" name="payment_pace_checkout_status" value="0"/>
+							{% endif %}
+						</div>
+					</div>
 
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Playground Client ID</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_username_sandbox %}
-              <input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value="{{ payment_pace_checkout_username_sandbox  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-               <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Playground Client Secret</label>
-            <div class="col-sm-5">
-             {% if payment_pace_checkout_password_sandbox %}
-              <input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value="{{ payment_pace_checkout_password_sandbox  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-          <h3>Pace Widgets</h3>
-          <h4>Product Widget</h4>
-
-            <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Enable</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_product_widget_status %}
-              <input type="checkbox" checked id="checkbox-enable-product" name="payment_pace_checkout_product_widget_status" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable-product" name="payment_pace_checkout_product_widget_status" value="0" />
-                {% endif %}
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">{{ enable_sandbox }}</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_status_sandbox %}
+								<input type="checkbox" checked id="checkbox-enable-sandbox" name="payment_pace_checkout_status_sandbox" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable-sandbox" name="payment_pace_checkout_status_sandbox" value="0"/>
+							{% endif %}
+						</div>
+					</div>
 
 
-             <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Theme color</label>
-            <div class="col-sm-5">
-            <select class="select-pace-mode" value="{{payment_pace_checkout_product_theme_color}}" name="payment_pace_checkout_product_theme_color">
-              <option>Please select theme color</option>
-              <option {{ payment_pace_checkout_product_theme_color == '1' ? 'selected' : ''}} value="1">Dark</option>
-              <option {{ payment_pace_checkout_product_theme_color == '2' ? 'selected' : ''}} value="2">Light</option>
-            </select>
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">{{ pay_mode_title }}</label>
+						<div class="col-sm-5">
+							<select class="select-pace-mode" value="{{payment_pace_checkout_pace_mode}}" name="payment_pace_checkout_pace_mode">
+								<option {{ payment_pace_checkout_pace_mode == '1' ? 'selected' : ''}} value="1">Popup</option>
+								<option {{ payment_pace_checkout_pace_mode == '2' ? 'selected' : ''}} value="2">Redirect</option>
+							</select>
+						</div>
+					</div>
+
+					{# Start Manage unpaid orders #}
+					<h3>Manage Orders</h3>
+					<p>Manage your orders by choosing the status you want them to have when their corresponding Pace transactions have changed status.</p>
+					<div class="form-group">
+						<label for="input-order-status-transaction-cancel" class="col-sm-2 control-label">{{ entry_order_status_transaction_cancelled }}</label>
+						<div class="col-sm-5">
+							<select name="payment_pace_checkout_order_status_transaction_cancelled" id="input-order-status-transaction-cancel" class="form-control">
+								{% for order_status in order_statuses_unpaid %}
+									<option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_cancelled %} selected="selected" {% endif %}>{{ order_status.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="input-order-status-transaction-expire" class="col-sm-2 control-label">{{ entry_order_status_transaction_expired }}</label>
+						<div class="col-sm-5">
+							<select name="payment_pace_checkout_order_status_transaction_expired" id="input-order-status-transaction-expire" class="form-control">
+								{% for order_status in order_statuses_unpaid %}
+									<option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_expired %} selected="selected" {% endif %}>{{ order_status.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					{# End Manage unpaid orders #}
+
+					{# Start Manage status orders #}
+					<div class="form-group">
+						<label for="input-order-status-transaction-pending" class="col-sm-2 control-label">{{ entry_order_status_transaction_pending }}</label>
+						<div class="col-sm-5">
+							<select name="payment_pace_checkout_order_status_transaction_pending" id="input-order-status-transaction-pending" class="form-control">
+								{% for order_status in order_statuses %}
+									<option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_pending %} selected="selected" {% endif %}>{{ order_status.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="input-order-status-transaction-approved" class="col-sm-2 control-label">{{ entry_order_status_transaction_approved }}</label>
+						<div class="col-sm-5">
+							<select name="payment_pace_checkout_order_status_transaction_approved" id="input-order-status-transaction-approved" class="form-control">
+								{% for order_status in order_statuses %}
+									<option value="{{ order_status.order_status_id }}" {% if order_status.order_status_id == payment_pace_checkout_order_status_transaction_approved %} selected="selected" {% endif %}>{{ order_status.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					{# End Manage status orders #}
+
+					<h3>
+						API Credentials
+					</h3>
+					<p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Client ID</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_username %}
+								<input name="payment_pace_checkout_username" class="form-control" type="text" value="{{ payment_pace_checkout_username }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_username" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Client Secret</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_password %}
+								<input name="payment_pace_checkout_password" class="form-control" type="password" value="{{ payment_pace_checkout_password }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_password" class="form-control" type="password" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_product_primary_color %}
-              <input name="payment_pace_checkout_product_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_product_primary_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_product_primary_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Playground Client ID</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_username_sandbox %}
+								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value="{{ payment_pace_checkout_username_sandbox }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-            <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text second color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_product_second_color %}
-              <input name="payment_pace_checkout_product_second_color" class="form-control" type="text" value="{{ payment_pace_checkout_product_second_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_product_second_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Playground Client Secret</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_password_sandbox %}
+								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value="{{ payment_pace_checkout_password_sandbox }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-            <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Font size</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_product_fontsize %}
-              <input name="payment_pace_checkout_product_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_product_fontsize  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_product_fontsize" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<h3>Pace Widgets</h3>
+					<h4>Product Widget</h4>
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">widget style</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_product_widget_style %}
-              <input name="payment_pace_checkout_product_widget_style" class="form-control" type="text" value="{{ payment_pace_checkout_product_widget_style  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_product_widget_style" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-          
-          <h4>Product Catalog Widget</h4>
-
-            <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Enable</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_catalog_widget_status %}
-              <input type="checkbox" checked id="checkbox-enable-catalog" name="payment_pace_checkout_catalog_widget_status" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable-catalog" name="payment_pace_checkout_catalog_widget_status" value="0" />
-                {% endif %}
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Enable</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_product_widget_status %}
+								<input type="checkbox" checked id="checkbox-enable-product" name="payment_pace_checkout_product_widget_status" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable-product" name="payment_pace_checkout_product_widget_status" value="0"/>
+							{% endif %}
+						</div>
+					</div>
 
 
-             <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Theme color</label>
-            <div class="col-sm-5">
-            <select class="select-pace-mode" value="{{payment_pace_checkout_catalog_theme_color}}" name="payment_pace_checkout_catalog_theme_color">
-              <option>Please select theme color</option>
-              <option {{ payment_pace_checkout_catalog_theme_color == '1' ? 'selected' : ''}} value="1">Dark</option>
-              <option {{ payment_pace_checkout_catalog_theme_color == '2' ? 'selected' : ''}} value="2">Light</option>
-            </select>
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Theme color</label>
+						<div class="col-sm-5">
+							<select class="select-pace-mode" value="{{payment_pace_checkout_product_theme_color}}" name="payment_pace_checkout_product_theme_color">
+								<option>Please select theme color</option>
+								<option {{ payment_pace_checkout_product_theme_color == '1' ? 'selected' : ''}} value="1">Dark</option>
+								<option {{ payment_pace_checkout_product_theme_color == '2' ? 'selected' : ''}} value="2">Light</option>
+							</select>
+						</div>
+					</div>
 
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_catalog_primary_color %}
-              <input name="payment_pace_checkout_catalog_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_primary_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_catalog_primary_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_product_primary_color %}
+								<input name="payment_pace_checkout_product_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_product_primary_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_product_primary_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-            <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Font size</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_catalog_fontsize %}
-              <input name="payment_pace_checkout_catalog_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_fontsize  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_catalog_fontsize" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text second color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_product_second_color %}
+								<input name="payment_pace_checkout_product_second_color" class="form-control" type="text" value="{{ payment_pace_checkout_product_second_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_product_second_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">widget style</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_catalog_widget_style %}
-              <input name="payment_pace_checkout_catalog_widget_style" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_widget_style  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_catalog_widget_style" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Font size</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_product_fontsize %}
+								<input name="payment_pace_checkout_product_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_product_fontsize }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_product_fontsize" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-
-          <h4>Checkout Widget</h4>
-
-            <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Enable</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_widget_status %}
-              <input type="checkbox" checked id="checkbox-enable-checkout" name="payment_pace_checkout_widget_status" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable-checkout" name="payment_pace_checkout_widget_status" value="0" />
-                {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">widget style</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_product_widget_style %}
+								<input name="payment_pace_checkout_product_widget_style" class="form-control" type="text" value="{{ payment_pace_checkout_product_widget_style }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_product_widget_style" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
 
-          
+					<h4>Product Catalog Widget</h4>
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_primary_color %}
-              <input name="payment_pace_checkout_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_primary_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_primary_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text second color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_second_color %}
-              <input name="payment_pace_checkout_second_color" class="form-control" type="text" value="{{ payment_pace_checkout_second_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_second_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-             <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Text timeline color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_text_timeline_color %}
-              <input name="payment_pace_checkout_text_timeline_color" class="form-control" type="text" value="{{ payment_pace_checkout_text_timeline_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_text_timeline_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Enable</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_catalog_widget_status %}
+								<input type="checkbox" checked id="checkbox-enable-catalog" name="payment_pace_checkout_catalog_widget_status" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable-catalog" name="payment_pace_checkout_catalog_widget_status" value="0"/>
+							{% endif %}
+						</div>
+					</div>
 
 
-             <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Background color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_background_color %}
-              <input name="payment_pace_checkout_background_color" class="form-control" type="text" value="{{ payment_pace_checkout_background_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_background_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-           <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Foreground color</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_foreground_color %}
-              <input name="payment_pace_checkout_foreground_color" class="form-control" type="text" value="{{ payment_pace_checkout_foreground_color  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_foreground_color" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-
-            <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Font size</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_fontsize %}
-              <input name="payment_pace_checkout_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_fontsize  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_fontsize" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Theme color</label>
+						<div class="col-sm-5">
+							<select class="select-pace-mode" value="{{payment_pace_checkout_catalog_theme_color}}" name="payment_pace_checkout_catalog_theme_color">
+								<option>Please select theme color</option>
+								<option {{ payment_pace_checkout_catalog_theme_color == '1' ? 'selected' : ''}} value="1">Dark</option>
+								<option {{ payment_pace_checkout_catalog_theme_color == '2' ? 'selected' : ''}} value="2">Light</option>
+							</select>
+						</div>
+					</div>
 
 
-             <h4>Checkout Widget</h4>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_catalog_primary_color %}
+								<input name="payment_pace_checkout_catalog_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_primary_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_catalog_primary_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
-            <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">Enable Fallback Widget</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_fallback_widget %}
-              <input type="checkbox" checked id="checkbox-enable-fallback" name="payment_pace_checkout_fallback_widget" value="1" />
-              {% else %}
-              <input type="checkbox" id="checkbox-enable-fallback" name="payment_pace_checkout_fallback_widget" value="0" />
-                {% endif %}
-            </div>
-          </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Font size</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_catalog_fontsize %}
+								<input name="payment_pace_checkout_catalog_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_fontsize }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_catalog_fontsize" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">widget style</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_catalog_widget_style %}
+								<input name="payment_pace_checkout_catalog_widget_style" class="form-control" type="text" value="{{ payment_pace_checkout_catalog_widget_style }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_catalog_widget_style" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
 
 
-          
+					<h4>Checkout Widget</h4>
 
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Logo style</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_logo_style %}
-              <input name="payment_pace_checkout_logo_style" class="form-control" type="text" value="{{ payment_pace_checkout_logo_style  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_logo_style" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-          <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
-            <div class="col-sm-5">
-            <select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
-              <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
-              <option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
-               <option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
-            </select>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Enable</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_widget_status %}
+								<input type="checkbox" checked id="checkbox-enable-checkout" name="payment_pace_checkout_widget_status" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable-checkout" name="payment_pace_checkout_widget_status" value="0"/>
+							{% endif %}
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_primary_color %}
+								<input name="payment_pace_checkout_primary_color" class="form-control" type="text" value="{{ payment_pace_checkout_primary_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_primary_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text second color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_second_color %}
+								<input name="payment_pace_checkout_second_color" class="form-control" type="text" value="{{ payment_pace_checkout_second_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_second_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Text timeline color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_text_timeline_color %}
+								<input name="payment_pace_checkout_text_timeline_color" class="form-control" type="text" value="{{ payment_pace_checkout_text_timeline_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_text_timeline_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Background color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_background_color %}
+								<input name="payment_pace_checkout_background_color" class="form-control" type="text" value="{{ payment_pace_checkout_background_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_background_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Foreground color</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_foreground_color %}
+								<input name="payment_pace_checkout_foreground_color" class="form-control" type="text" value="{{ payment_pace_checkout_foreground_color }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_foreground_color" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Font size</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_fontsize %}
+								<input name="payment_pace_checkout_fontsize" class="form-control" type="text" value="{{ payment_pace_checkout_fontsize }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_fontsize" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+
+
+					<h4>Checkout Widget</h4>
+
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">Enable Fallback Widget</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_fallback_widget %}
+								<input type="checkbox" checked id="checkbox-enable-fallback" name="payment_pace_checkout_fallback_widget" value="1"/>
+							{% else %}
+								<input type="checkbox" id="checkbox-enable-fallback" name="payment_pace_checkout_fallback_widget" value="0"/>
+							{% endif %}
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Logo style</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_logo_style %}
+								<input name="payment_pace_checkout_logo_style" class="form-control" type="text" value="{{ payment_pace_checkout_logo_style }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_logo_style" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
+						<div class="col-sm-5">
+							<select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
+								<option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
+								<option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
+								<option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
+							</select>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
-{{ footer }} 
+{{ footer }}
