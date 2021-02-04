@@ -78,6 +78,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	public function updateOrderStatus()
 	{
 		extract($_GET); /* retrieve get params */
+		$this->load->model('checkout/order');
+
+		$this->model_checkout_order->addOrderHistory($orderID, $status);
 
 		$_sql = sprintf("UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $status, $orderID);
 		// do update
