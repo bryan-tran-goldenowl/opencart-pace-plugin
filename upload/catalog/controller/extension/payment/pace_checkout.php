@@ -58,7 +58,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 				$setting                         = $this->model_setting_setting->getSetting('payment_pace_checkout');
 				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
-				$transaction['pace_approved']	 = $setting['payment_pace_checkout_order_status_transaction_approved'];
+				$transaction['pace_approved']	 = isset($setting['payment_pace_checkout_order_status_transaction_approved']) ? $setting['payment_pace_checkout_order_status_transaction_approved'] : 5;
 				$transaction['redirect_success'] = $this->url->link('checkout/success');
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
 			}else {
