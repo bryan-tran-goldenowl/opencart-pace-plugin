@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.4-rc03</version>
-  <code>1.0.4-rc03</code>
+  <version>1.0.4-rc02</version>
+  <code>1.0.4-rc02</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -53,15 +53,23 @@
           $order_id = $this->session->data['order_id'];
           $transactionId = $_GET['transactionId'];
           $merchantReferenceId = $_GET['merchantReferenceId'];
-
+          $change_by = false;
+          $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_status_history` WHERE order_id = '" . (int) $order_id . "' ORDER BY id DESC LIMIT 1");
+          if ($query->num_rows) {
+              if (isset($query->row['change_by'])) {
+                 $change_by = true;
+              }
+          }
+     
           if ( $order_id == $merchantReferenceId ) {
             $this->load->model('setting/setting');
             $pace_settings = $this->model_setting_setting->getSetting('payment_pace_checkout');
             $approved_status = (int) $pace_settings['payment_pace_checkout_order_status_transaction_approved'];
-
-            // update order status
-            $sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $approved_status, $order_id );
-            $this->db->query( $sql );
+              if ($change_by) {
+                $sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $approved_status, $order_id );
+                $this->db->query( $sql );
+              }
+            
           }
         ]]>
       </add>
@@ -340,6 +348,21 @@
     <operation>
       <search><![CDATA[public function index() {]]></search>
       <add position="replace"><![CDATA[
+
+    private function get_last_order_status($order_id)
+    {
+
+        $query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_status_history` WHERE order_id = '" . (int) $order_id . "' ORDER BY id DESC LIMIT 1");
+        if ($query->num_rows) {
+            if (isset($query->row['change_by'])) {
+                return [
+                    'change_by' => $query->row['change_by'],
+
+                ];
+            }
+        }
+        return [];
+    }
      
     private function handleCancelTransaction()
     {
@@ -352,6 +375,9 @@
             header("Location: $url");
             die();
         }
+
+         $last_status = $this->get_last_order_status($order_id);
+
         $user = $this->model_extension_module_pace->getUser();
         $transaction = $this->model_extension_module_pace->getOrderTransaction($order_id) ? json_decode($this->model_extension_module_pace->getOrderTransaction($order_id)['data'], true) : [];
         if (!$transaction) {
@@ -370,6 +396,10 @@
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $result = curl_exec($ch);
+
+         if (isset($last_status['change_by']) && $last_status['change_by'] != "system") {
+            return false;
+        }
 
         if (curl_errno($ch)) {
             echo 'Error:' . curl_error($ch);

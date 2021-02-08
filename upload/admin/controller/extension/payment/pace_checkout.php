@@ -63,7 +63,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$this->load->model('localisation/order_status');
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
-		$data['order_statuses_unpaid'] = self::_unpaid_order_statuses( $data['order_statuses'] );
+		$data['order_statuses_unpaid'] = self::_unpaid_order_statuses($data['order_statuses']);
 
 		$field = [
 			'payment_pace_checkout_status',
@@ -121,16 +121,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	{
 		$this->load->model('extension/module/cron');
 		$data = $this->model_extension_module_cron->getUser();
-		header('Cache-Control: no-cache, must-revalidate, max-age=0');
-		$has_supplied_credentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
-		$is_not_authenticated = (!$has_supplied_credentials ||
-			$_SERVER['PHP_AUTH_USER'] != $data['user_name'] ||
-			$_SERVER['PHP_AUTH_PW']   != $data['password']);
-		if ($is_not_authenticated) {
-			header('HTTP/1.1 401 Authorization Required');
-			header('WWW-Authenticate: Basic realm="Access denied"');
-			exit;
-		}
+
 		$this->model_extension_module_cron->checkCron();
 	}
 	protected function validate()
@@ -142,13 +133,14 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return !$this->error;
 	}
 
-	private static function _unpaid_order_statuses( $list_of_statuses ) {
+	private static function _unpaid_order_statuses($list_of_statuses)
+	{
 		$_list_of_statuses = array();
-		array_walk( $list_of_statuses, function( $v, $k ) use ( &$_list_of_statuses ) {
-			if ( 7 === (int) $v['order_status_id'] || 10 === (int) $v['order_status_id'] ) {
-				array_push( $_list_of_statuses, $v );
+		array_walk($list_of_statuses, function ($v, $k) use (&$_list_of_statuses) {
+			if (7 === (int) $v['order_status_id'] || 10 === (int) $v['order_status_id']) {
+				array_push($_list_of_statuses, $v);
 			}
-		} );
+		});
 
 		return $_list_of_statuses;
 	}

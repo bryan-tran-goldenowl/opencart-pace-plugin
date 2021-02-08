@@ -13,6 +13,7 @@ class ModelExtensionModuleCron extends Model
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  updated_at > UTC_TIMESTAMP()");
 		if (!$query->rows) {
 			$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 0, updated_at = DATE_ADD(UTC_TIMESTAMP(), interval $setting[payment_pace_checkout_cron] second);");
+			$this->getListOrder();
 		} else {
 			if (!$query->row['status'] &&  strtotime($query->row['updated_at']) - strtotime('now') < 120) {
 				$this->getListOrder();
