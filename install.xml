@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.4-rc02</version>
-  <code>1.0.4-rc02</code>
+  <version>1.0.4-rc03</version>
+  <code>1.0.4-rc03</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -70,17 +70,10 @@
 
   <file path="catalog/view/theme/*/template/extension/module/featured.twig" error="log">
     <operation>
-      <search><![CDATA[<div class="button-group">]]></search>
-      <add position="replace"><![CDATA[
-      <div id="multiple-widget" 
-      data-price='{{product.pace_price}}'
-      data-enable='{{payment_pace_checkout_catalog_widget_status}}'
-      data-theme='{{payment_pace_checkout_catalog_theme_color}}'
-      data-primary='{{payment_pace_checkout_catalog_primary_color}}'
-      data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'
-      style='{{payment_pace_checkout_catalog_widget_style}}'
-      > </div>
-     <div class="button-group">
+      <search regex="true"><![CDATA[~(.*?(<p\sclass="price">\D+?<\/p>))~]]></search>
+      <add position="after"><![CDATA[
+      <p class="price"> {% if not product.special %} {{ product.price }} {% else %} <span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span> {% endif %} {% if product.tax %} <span class="price-tax">{{ text_tax }} {{ product.tax }}</span> {% endif %} </p>
+      <div id="multiple-widget"data-price='{{product.pace_price}}'data-enable='{{payment_pace_checkout_catalog_widget_status}}'data-theme='{{payment_pace_checkout_catalog_theme_color}}'data-primary='{{payment_pace_checkout_catalog_primary_color}}'data-fontsize='{{payment_pace_checkout_catalog_fontsize}}'style='{{payment_pace_checkout_catalog_widget_style}}'> </div>
      ]]></add>
     </operation>
   </file>
@@ -345,8 +338,13 @@
     {
 
         $this->load->model('extension/module/pace');
-        $order_id = $this->session->data['order_id'];
+        $order_id = isset($this->session->data['order_id']) ? $this->session->data['order_id'] : null;
 
+        if (!$order_id) {
+            $url = $this->url->link('common/home', '', true);
+            header("Location: $url");
+            die();
+        }
         $user = $this->model_extension_module_pace->getUser();
         $transaction = $this->model_extension_module_pace->getOrderTransaction($order_id) ? json_decode($this->model_extension_module_pace->getOrderTransaction($order_id)['data'], true) : [];
         if (!$transaction) {
@@ -606,5 +604,16 @@
       ]]></add>
     </operation>
   </file>
+
+   <file path="catalog/model/checkout/order.php">
+    <operation>
+      <search><![CDATA[$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");]]></search>
+      <add position="after"><![CDATA[
+        $this->load->model('extension/module/pace');
+			$this->model_extension_module_pace->track_order_status_change_by($order_id, $order_status_id , 'user');
+      ]]></add>
+    </operation>
+  </file>
+
 </modification>
 
