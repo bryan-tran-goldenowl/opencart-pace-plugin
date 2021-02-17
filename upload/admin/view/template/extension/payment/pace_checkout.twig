@@ -65,8 +65,7 @@ window.onload = function(){
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment" class="form-horizontal">
-
-              <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_status %}
@@ -76,9 +75,7 @@ window.onload = function(){
                 {% endif %}
             </div>
           </div>
-
-
-             <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">{{ enable_sandbox }}</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_status_sandbox %}
@@ -88,10 +85,7 @@ window.onload = function(){
                 {% endif %}
             </div>
           </div>
-
-         
-
-             <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">{{ pay_mode_title }}</label>
             <div class="col-sm-5">
             <select class="select-pace-mode" value="{{payment_pace_checkout_pace_mode}}" name="payment_pace_checkout_pace_mode">
@@ -149,10 +143,20 @@ window.onload = function(){
             </div>
           </div>
           {# End Manage status orders #}
+          <div class="form-group display-flex">
+            <label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
+            <div class="col-sm-5">
+            <select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
+              <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
+              <option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
+               <option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
+            </select>
+            </div>
+          </div>
 
-<h3> API Credentials </h3>
-<p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
- <div class="form-group">
+          <h3> API Credentials </h3>
+          <p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Client ID</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_username %}
@@ -162,8 +166,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-               <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Client Secret</label>
             <div class="col-sm-5">
              {% if payment_pace_checkout_password %}
@@ -173,8 +176,6 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Playground Client ID</label>
             <div class="col-sm-5">
@@ -185,8 +186,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-               <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Playground Client Secret</label>
             <div class="col-sm-5">
              {% if payment_pace_checkout_password_sandbox %}
@@ -196,11 +196,9 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
           <h3>Pace Widgets</h3>
           <h4>Product Widget</h4>
-
-            <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Enable</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_product_widget_status %}
@@ -210,9 +208,7 @@ window.onload = function(){
                 {% endif %}
             </div>
           </div>
-
-
-             <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Theme color</label>
             <div class="col-sm-5">
             <select class="select-pace-mode" value="{{payment_pace_checkout_product_theme_color}}" name="payment_pace_checkout_product_theme_color">
@@ -222,8 +218,6 @@ window.onload = function(){
             </select>
             </div>
           </div>
-
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
             <div class="col-sm-5">
@@ -234,8 +228,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-            <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text second color</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_product_second_color %}
@@ -245,8 +238,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-            <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Font size</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_product_fontsize %}
@@ -256,7 +248,6 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">widget style</label>
             <div class="col-sm-5">
@@ -268,10 +259,8 @@ window.onload = function(){
             </div>
           </div>
 
-          
           <h4>Product Catalog Widget</h4>
-
-            <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Enable</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_catalog_widget_status %}
@@ -281,9 +270,7 @@ window.onload = function(){
                 {% endif %}
             </div>
           </div>
-
-
-             <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Theme color</label>
             <div class="col-sm-5">
             <select class="select-pace-mode" value="{{payment_pace_checkout_catalog_theme_color}}" name="payment_pace_checkout_catalog_theme_color">
@@ -293,8 +280,6 @@ window.onload = function(){
             </select>
             </div>
           </div>
-
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
             <div class="col-sm-5">
@@ -305,8 +290,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-            <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Font size</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_catalog_fontsize %}
@@ -316,7 +300,6 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">widget style</label>
             <div class="col-sm-5">
@@ -327,11 +310,8 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-
           <h4>Checkout Widget</h4>
-
-            <div class="form-group display-flex">
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Enable</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_widget_status %}
@@ -341,10 +321,6 @@ window.onload = function(){
                 {% endif %}
             </div>
           </div>
-
-
-          
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text primary color</label>
             <div class="col-sm-5">
@@ -355,8 +331,6 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-
           <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text second color</label>
             <div class="col-sm-5">
@@ -367,8 +341,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-             <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Text timeline color</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_text_timeline_color %}
@@ -378,9 +351,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-
-             <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Background color</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_background_color %}
@@ -390,8 +361,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-           <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Foreground color</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_foreground_color %}
@@ -401,8 +371,7 @@ window.onload = function(){
             {% endif %}
             </div>
           </div>
-
-            <div class="form-group">
+          <div class="form-group">
             <label class="col-sm-2 control-label" for="input-status">Font size</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_fontsize %}
@@ -413,10 +382,8 @@ window.onload = function(){
             </div>
           </div>
 
-
-             <h4>Checkout Widget</h4>
-
-            <div class="form-group display-flex">
+          <h4>Options</h4>
+          <div class="form-group display-flex">
             <label class="col-sm-2 control-label" for="input-status">Enable Fallback Widget</label>
             <div class="col-sm-5">
             {% if payment_pace_checkout_fallback_widget %}
@@ -424,30 +391,6 @@ window.onload = function(){
               {% else %}
               <input type="checkbox" id="checkbox-enable-fallback" name="payment_pace_checkout_fallback_widget" value="0" />
                 {% endif %}
-            </div>
-          </div>
-
-
-          
-
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="input-status">Logo style</label>
-            <div class="col-sm-5">
-            {% if payment_pace_checkout_logo_style %}
-              <input name="payment_pace_checkout_logo_style" class="form-control" type="text" value="{{ payment_pace_checkout_logo_style  }}"/>
-            {%  else %}
-            <input name="payment_pace_checkout_logo_style" class="form-control" type="text" value=""/>
-            {% endif %}
-            </div>
-          </div>
-          <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
-            <div class="col-sm-5">
-            <select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
-              <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
-              <option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
-               <option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
-            </select>
             </div>
           </div>
         </form>
