@@ -586,8 +586,7 @@ class ModelExtensionModulePace extends Model
 
 			$getCurrency = $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' );
 
-			// check empty currency
-			if ( ! $getCurrency ) {
+			if ( ! isset( $listAvailableCurrencies[$getCurrency] ) ) {
 				throw new Exception( "Currency not found.", 404 );
 			}
 
