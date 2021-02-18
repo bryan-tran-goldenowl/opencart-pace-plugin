@@ -66,6 +66,7 @@
             $sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $approved_status, $order_id );
             $this->db->query( $sql );
           }
+          $this->load->language('checkout/success');
         ]]>
       </add>
     </operation>
