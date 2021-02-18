@@ -60,6 +60,9 @@
             $approved_status = (int) $pace_settings['payment_pace_checkout_order_status_transaction_approved'];
 
             // update order status
+            $this->load->model('checkout/order');
+
+	        	$this->model_checkout_order->addOrderHistory($order_id, $approved_status);
             $sql = sprintf( "UPDATE `%sorder` SET order_status_id=%d WHERE order_id=%d", DB_PREFIX, $approved_status, $order_id );
             $this->db->query( $sql );
           }
