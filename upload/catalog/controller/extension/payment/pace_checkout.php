@@ -59,7 +59,19 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 				$setting                         = $this->model_setting_setting->getSetting('payment_pace_checkout');
 				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
 				$transaction['pace_approved']	 = isset($setting['payment_pace_checkout_order_status_transaction_approved']) ? $setting['payment_pace_checkout_order_status_transaction_approved'] : 5;
-				$transaction['redirect_success'] = $this->url->link('checkout/success');
+				// build transaction query on success url
+				$parse_success_url = parse_url( $this->url->link('checkout/success') );
+				$list_query = array();
+
+				if ( isset( $parse_success_url['query'] ) ) {
+					$route = explode( '=', $parse_success_url['query'] );
+					$list_query[$route[0]] = $route[1];
+				}
+				$list_query['transactionId'] = $transaction['transactionId'];
+				$list_query['merchantReferenceId'] = $transaction['merchantReferenceId'];
+				$build_query = http_build_query( $list_query );
+				
+				$transaction['redirect_success'] = $parse_success_url['scheme'] . '://' . $parse_success_url['host'] . '?' . $parse_success_url['path'] . 
 				$transaction['redirect_failure'] = $this->url->link('checkout/failure');
 			} else {
 				throw new \Exception('Session is expired please refresh a page');
