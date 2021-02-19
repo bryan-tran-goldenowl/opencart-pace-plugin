@@ -99,14 +99,14 @@
           // append Pace SDK
           printf('<script> var pacePlan = %s; </script> ', json_encode( $getPacePlan ) );
 
-          if ( $setting['payment_pace_checkout_fallback_widget'] ) {
+          if ( isset($setting['payment_pace_checkout_fallback_widget']) ) {
             $this->document->addScript('/catalog/view/javascript/pace/checkout.js');  
           } else {
             $this->document->addScript('/catalog/view/javascript/pace/checkout-without-fallback.js'); 
           }
 
           $this->document->addScript('/catalog/view/javascript/pace/pace-widget.js');
-
+          $this->document->addStyle('/catalog/view/javascript/pace/css/pace.css');
           if ( $setting['payment_pace_checkout_status'] && !$setting['payment_pace_checkout_status_sandbox'] ) {
               $this->document->addScript('https://pay.pacenow.co/pace-pay.js', 'header', true);
           } else if($setting['payment_pace_checkout_status_sandbox']){
