@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.5-rc02</version>
-  <code>1.0.5-rc02</code>
+  <version>1.0.5-rc03</version>
+  <code>1.0.5-rc03</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -352,7 +352,7 @@
         $user = $this->model_extension_module_pace->getUser();
         $transaction = $this->model_extension_module_pace->getOrderTransaction($order_id) ? json_decode($this->model_extension_module_pace->getOrderTransaction($order_id)['data'], true) : [];
         if (!$transaction) {
-            throw new \Exception('Error: Could not find transaction ');
+          return;
         }
         $ch = curl_init();
 
@@ -382,7 +382,7 @@
     }
 
     public function index() {
-       $result =  $this->handleCancelTransaction();
+       $result = $this->handleCancelTransaction();
         if (isset($this->session->data['order_id'])) {
             $this->cart->clear();
 

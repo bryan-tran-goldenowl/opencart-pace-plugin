@@ -40,12 +40,12 @@ onSuccess: function (data) { // Update order status based on Pace transaction
 updateOrderStatus({order_id: json.order_id, status: json.pace_approved});
 
 if (json['redirect_success']) {
-location = json['redirect_success'];
+window.location.href = json['redirect_success'];
 }
 },
 onCancel: function () {
 if (json['redirect_failure']) {
-location = json['redirect_failure']
+window.location.href = json['redirect_failure'];
 }
 },
 onLoad: function () {
