@@ -24,8 +24,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 	public function confirm()
 	{
 		$errors = array();
-
-
 		$this->load->model('extension/module/pace');
 		$this->load->model('checkout/order');
 		$this->load->model('setting/setting');
@@ -56,9 +54,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 					$this->model_extension_module_pace->insertTransaction($this->session->data['order_id'], $transaction['transactionID'], $result);
 				}
 
-				$setting                         = $this->model_setting_setting->getSetting('payment_pace_checkout');
-				$transaction['pace_mode']        = $setting['payment_pace_checkout_pace_mode'];
-				$transaction['pace_approved']	 = isset($setting['payment_pace_checkout_order_status_transaction_approved']) ? $setting['payment_pace_checkout_order_status_transaction_approved'] : 5;
+				$setting                      = $this->model_setting_setting->getSetting('payment_pace_checkout');
+				$transaction['pace_mode']     = $setting['payment_pace_checkout_pace_mode'];
+				$transaction['pace_approved'] = isset($setting['payment_pace_checkout_order_status_transaction_approved']) ? $setting['payment_pace_checkout_order_status_transaction_approved'] : 5;
 				
 				// build transaction query on success url
 				$parse_success_url = parse_url( $this->url->link('checkout/success') );
