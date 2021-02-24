@@ -451,11 +451,24 @@
       <search><![CDATA['price'       => $price,]]></search>
       <add position="replace"><![CDATA[
      'price'      => $price,
-     'pace_price' => $special ? $special : $price,
+     'pace_price' => $pace_price,
      ]]></add>
     </operation>
   </file>
 
+  <file path="catalog/controller/product/search.php" error="log">
+    <operation>
+      <search><![CDATA[$data['products'][] = array(]]></search>
+      <add position="replace">
+        <![CDATA[
+          $pace_price = 0 ==! $result['special'] ? $result['special'] : $result['price'];
+          $pace_price = $this->tax->calculate($pace_price, $result['tax_class_id'], $this->config->get('config_tax'));
+          $pace_price = $this->currency->format( $pace_price, $this->session->data['currency'], '', false );
+          $data['products'][] = array(
+        ]]>
+      </add>
+    </operation>
+  </file>>
 
    <file path="catalog/controller/product/search.php" error="log">
     <operation>

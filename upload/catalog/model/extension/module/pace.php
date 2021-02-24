@@ -582,6 +582,10 @@ class ModelExtensionModulePace extends Model
 		try {
 			$getPacePlan = $this->getPacePlan();
 
+			if ( gettype( $getPacePlan ) === 'string' ) {
+				$getPacePlan = json_decode( $getPacePlan );
+			}
+
 			// return false if get pace plan is failed
 			if ( ! $getPacePlan ) {
 				throw new Exception("Error Processing Request", 1);
