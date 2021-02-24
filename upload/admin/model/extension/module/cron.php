@@ -10,13 +10,14 @@ class ModelExtensionModuleCron extends Model
 	{
 		$this->load->model('setting/setting');
 		$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  updated_at > UTC_TIMESTAMP()");
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  updated_at > UTC_TIMESTAMP() and cron_id = 1");
 		if (!$query->rows) {
-			$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 0, updated_at = DATE_ADD(UTC_TIMESTAMP(), interval $setting[payment_pace_checkout_cron] second);");
+			$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 0, updated_at = DATE_ADD(UTC_TIMESTAMP(), interval $setting[payment_pace_checkout_cron] second) where  cron_id = 1;");
+			$this->getListOrder();
 		} else {
 			if (!$query->row['status'] &&  strtotime($query->row['updated_at']) - strtotime('now') < 120) {
 				$this->getListOrder();
-				$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 1;");
+				$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 1 where  cron_id = 1;");
 			}
 		}
 	}
@@ -207,6 +208,95 @@ class ModelExtensionModuleCron extends Model
 		}
 	}
 
+	public function checkCronPlans()
+	{
+
+		$this->checkConfigExist();
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  updated_at > UTC_TIMESTAMP() and cron_id = 2;");
+		if (!$query->rows) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 0, updated_at = DATE_ADD(UTC_TIMESTAMP(), interval 3600 second) where cron_id = 2;");
+			$result = $this->getPacePlan();
+			$this->handleStorePaymentplan($result);
+		} else {
+			if (!$query->row['status'] &&  strtotime($query->row['updated_at']) - strtotime('now') < 120) {
+				$result = $this->getPacePlan();
+				$this->handleStorePaymentplan($result);
+				$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 1 where cron_id = 2;");
+			}
+		}
+	}
+
+	private function checkConfigExist()
+	{
+
+		$query_setting = $this->db->query("SELECT * FROM `" . DB_PREFIX . "setting` where  `key` = 'payment_pace_checkout_plans';");
+		if (!$query_setting->rows) {
+			$this->db->query("INSERT INTO `oc_setting` ( `store_id`, `code`, `key`, `value`, `serialized`)
+			VALUES
+				(0, 'payment_pace_checkout', 'payment_pace_checkout_plans', '', 0);
+			");
+		}
+
+		$query_cron = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  `cron_id` = 2;");
+		if (!$query_cron->rows) {
+			$this->db->query("INSERT INTO `oc_cron` (`cron_id`, `created_at`, `updated_at`)
+         	VALUES
+             (2, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+         	");
+		}
+	}
+
+	private function handleStorePaymentplan($data)
+	{
+		if (!!$data) {
+			$this->load->model('setting/setting');
+			$json_data = json_encode($data);
+			$this->model_setting_setting->editSettingValue('payment_pace_checkout', 'payment_pace_checkout_plans', $json_data);
+		}
+	}
+
+	public function getPacePlan()
+	{
+		try {
+			$credential = $this->getUser();
+
+			$ch = curl_init();
+			$token = base64_encode($credential['user_name'] . ':' . $credential['password']);
+
+			curl_setopt_array($ch, array(
+				CURLOPT_URL            => $credential['api'] . '/v1/checkouts/plans',
+				CURLOPT_TIMEOUT        => 30,
+				CURLOPT_ENCODING       => '',
+				CURLOPT_MAXREDIRS      => 10,
+				CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST  => 'GET',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_HTTPHEADER     => array(
+					"Content-Type: text/plain",
+					"authorization: Basic {$token}",
+					"cache-control: no-cache"
+				)
+			));
+
+			$getPacePlan = json_decode(curl_exec($ch));
+			$error = curl_error($ch);
+
+			curl_close($ch);
+
+			if ($error) {
+				throw new Exception($error);
+			}
+
+			if (isset($getPacePlan->error)) {
+				throw new Exception($getPacePlan->error->message . '. code: ' . $getPacePlan->correlation_id);
+			}
+
+			return $getPacePlan->list;
+		} catch (Exception $e) {
+			$this->log->write($e->getMessage());
+			return [];
+		}
+	}
 
 
 

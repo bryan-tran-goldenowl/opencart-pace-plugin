@@ -63,7 +63,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$this->load->model('localisation/order_status');
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
-		$data['order_statuses_unpaid'] = self::_unpaid_order_statuses( $data['order_statuses'] );
+		$data['order_statuses_unpaid'] = self::_unpaid_order_statuses($data['order_statuses']);
 
 		$field = [
 			'payment_pace_checkout_status',
@@ -133,6 +133,12 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		}
 		$this->model_extension_module_cron->checkCron();
 	}
+
+	public function getPaymentPlans()
+	{
+		$this->load->model('extension/module/cron');
+		$this->model_extension_module_cron->checkCronPlans();
+	}
 	protected function validate()
 	{
 		if (!$this->user->hasPermission('modify', 'extension/payment/pace_checkout')) {
@@ -142,13 +148,16 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		return !$this->error;
 	}
 
-	private static function _unpaid_order_statuses( $list_of_statuses ) {
+
+
+	private static function _unpaid_order_statuses($list_of_statuses)
+	{
 		$_list_of_statuses = array();
-		array_walk( $list_of_statuses, function( $v, $k ) use ( &$_list_of_statuses ) {
-			if ( 7 === (int) $v['order_status_id'] || 10 === (int) $v['order_status_id'] ) {
-				array_push( $_list_of_statuses, $v );
+		array_walk($list_of_statuses, function ($v, $k) use (&$_list_of_statuses) {
+			if (7 === (int) $v['order_status_id'] || 10 === (int) $v['order_status_id']) {
+				array_push($_list_of_statuses, $v);
 			}
-		} );
+		});
 
 		return $_list_of_statuses;
 	}

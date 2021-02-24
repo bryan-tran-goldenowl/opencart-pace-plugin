@@ -435,7 +435,9 @@
    <file path="admin/controller/startup/login.php">
       <operation>
          <search index="0,1"><![CDATA[$ignore = array(]]></search>
-         <add position="after"><![CDATA[			'extension/payment/pace_checkout/runCron',]]></add>
+         <add position="after"><![CDATA[			'extension/payment/pace_checkout/runCron',
+                                               'extension/payment/pace_checkout/getPaymentPlans',]]></add>
+       
       </operation>
    </file>
 
