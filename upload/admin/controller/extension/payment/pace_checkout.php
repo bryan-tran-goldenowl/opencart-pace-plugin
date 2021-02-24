@@ -131,14 +131,11 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			header('WWW-Authenticate: Basic realm="Access denied"');
 			exit;
 		}
+		error_log("cron called");
 		$this->model_extension_module_cron->checkCron();
-	}
-
-	public function getPaymentPlans()
-	{
-		$this->load->model('extension/module/cron');
 		$this->model_extension_module_cron->checkCronPlans();
 	}
+
 	protected function validate()
 	{
 		if (!$this->user->hasPermission('modify', 'extension/payment/pace_checkout')) {

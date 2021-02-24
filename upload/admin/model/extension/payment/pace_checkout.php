@@ -26,6 +26,11 @@ class ModelExtensionPaymentPaceCheckout extends Controller
             (1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
         ");
 
+        $this->db->query("INSERT INTO `oc_cron` (`cron_id`, `created_at`, `updated_at`)
+        VALUES
+            (2, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+        ");
+
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "order_status_history` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `order_id` int(11) NOT NULL ,
