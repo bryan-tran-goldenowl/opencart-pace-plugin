@@ -111,7 +111,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'items'		   => [],
 			'amount'	   => $order['total'] * 100,
 			'currency'     => $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get('config_currency'),
-			'webhookUrl'   => $url,
+			'cronhookUrl'  => $url,
 			'referenceID'  => (string) $data['order_id'],
 			'redirectUrls' => array(
 				'success' => $this->url->link('checkout/success'),
