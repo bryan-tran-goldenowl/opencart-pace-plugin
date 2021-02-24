@@ -1,4 +1,8 @@
 <?php
+
+// define payment plans key
+define( 'PAYMENT_PLAN', 'payment_pace_checkout_plans' );
+
 class ModelExtensionModulePace extends Model
 {
 	public function addOrder($data)
@@ -506,6 +510,51 @@ class ModelExtensionModulePace extends Model
 	}
 
 	/**
+	 * Send a request to Pace API to get payment plans
+	 * 
+	 * @return array|object
+	 * @since 1.0.5-rc02
+	 */
+	public function sendRequestPaymentPlans() {
+		// store logs
+		$this->log->write( 'Send a request to Pace API to get payment plans' );
+
+		$ch         = curl_init();
+		$credential = $this->getUser();
+		$token      = base64_encode( $credential['user_name'] . ':' . $credential['password'] );
+
+		curl_setopt_array( $ch, array(
+			CURLOPT_URL            => $credential['api'] . '/v1/checkouts/plans',
+			CURLOPT_TIMEOUT        => 30,
+			CURLOPT_ENCODING       => '',
+			CURLOPT_MAXREDIRS      => 10,
+			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST  => 'GET',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_HTTPHEADER     => array(
+				"Content-Type: text/plain",
+				"authorization: Basic {$token}",
+				"cache-control: no-cache"
+			)
+		) );
+
+		$response = json_decode( curl_exec( $ch ) );
+		$error = curl_error( $ch );
+
+		curl_close( $ch );
+
+		if ( $error ) {
+			throw new Exception( $error );
+		}
+
+		if ( isset( $response->error ) ) {
+			throw new Exception( $response->error->message . '. code: ' . $response->correlation_id );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Get Pace plan according Credential
 	 *  
 	 * @throws string
@@ -513,40 +562,16 @@ class ModelExtensionModulePace extends Model
 	 */
 	public function getPacePlan() {
 		try {
-			$credential = $this->getUser();
-
-			$ch = curl_init();
-			$token = base64_encode( $credential['user_name'] . ':' . $credential['password'] );
-
-			curl_setopt_array( $ch, array(
-				CURLOPT_URL            => $credential['api'] . '/v1/checkouts/plans',
-				CURLOPT_TIMEOUT        => 30,
-				CURLOPT_ENCODING       => '',
-				CURLOPT_MAXREDIRS      => 10,
-				CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST  => 'GET',
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_HTTPHEADER     => array(
-					"Content-Type: text/plain",
-					"authorization: Basic {$token}",
-					"cache-control: no-cache"
-				)
-			) );
-
-			$getPacePlan = json_decode( curl_exec( $ch ) );
-			$error = curl_error( $ch );
-
-			curl_close( $ch );
-
-			if ( $error ) {
-				throw new Exception( $error );
+			// retrieve pace payment plan from setting
+			$pace_settings = $this->model_setting_setting->getSetting('payment_pace_checkout');
+			
+			if ( $pace_settings && isset( $pace_settings[PAYMENT_PLAN] ) ) {
+				return $pace_settings[PAYMENT_PLAN];
 			}
 
-			if ( isset( $getPacePlan->error ) ) {
-				throw new Exception( $getPacePlan->error->message . '. code: ' . $getPacePlan->correlation_id );
-			}
-
-			return $getPacePlan->list;
+			// call API to get payment plans
+			$sendRequest = $this->sendRequestPaymentPlans();
+			return $sendRequest->list;
 		} catch (Exception $e) {
 			$this->log->write( $e->getMessage() );
 			return [];
@@ -610,6 +635,7 @@ class ModelExtensionModulePace extends Model
 
 			return $pacePlanFollowCurrency;
 		} catch (Exception $e) {
+			$this->log->write( $e->getMessage() );
 			return false;
 		}
 	}
