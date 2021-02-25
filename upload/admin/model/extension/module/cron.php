@@ -163,7 +163,11 @@ class ModelExtensionModuleCron extends Model
 
 		foreach ($data as $key => $transaction) {
 			usort($transaction, function ($a, $b) {
-				return filter_var($a->transactionID, FILTER_SANITIZE_NUMBER_INT)  -  filter_var($b->transactionID, FILTER_SANITIZE_NUMBER_INT) > 0;
+
+				$currentTransactionId = is_numeric(filter_var($a, FILTER_SANITIZE_NUMBER_INT)) ?  filter_var($a, FILTER_SANITIZE_NUMBER_INT) : 0;
+				$nextTransactionId = is_numeric(filter_var($b, FILTER_SANITIZE_NUMBER_INT)) ?  filter_var($b, FILTER_SANITIZE_NUMBER_INT) : 0;
+
+				return $currentTransactionId -  $nextTransactionId > 0;
 			});
 
 			foreach ($transaction  as $value) {
@@ -246,6 +250,7 @@ class ModelExtensionModuleCron extends Model
 
 	public function handleStorePaymentplan()
 	{
+		$this->log->write('Handle store database payment plans');
 		$data = $this->getPacePlan();
 		if (!!$data) {
 			$this->load->model('setting/setting');
