@@ -244,7 +244,7 @@ class ModelExtensionModuleCron extends Model
 		}
 	}
 
-	public function handleStorePaymentplan($data)
+	public function handleStorePaymentplan()
 	{
 		$data = $this->getPacePlan();
 		if (!!$data) {
