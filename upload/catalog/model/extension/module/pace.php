@@ -562,6 +562,11 @@ class ModelExtensionModulePace extends Model
 	 */
 	public function getPacePlan() {
 		try {
+			// load setting module if dont exist
+			if ( !$this->model_setting_setting ) {
+				$this->load->model('setting/setting');
+			}
+			
 			// retrieve pace payment plan from setting
 			$pace_settings = $this->model_setting_setting->getSetting('payment_pace_checkout');
 			
