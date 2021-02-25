@@ -215,18 +215,16 @@ class ModelExtensionModuleCron extends Model
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "cron` where  updated_at > UTC_TIMESTAMP() and cron_id = 2;");
 		if (!$query->rows) {
 			$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 0, updated_at = DATE_ADD(UTC_TIMESTAMP(), interval 3600 second) where cron_id = 2;");
-			$result = $this->getPacePlan();
-			$this->handleStorePaymentplan($result);
+			$this->handleStorePaymentplan();
 		} else {
 			if (!$query->row['status'] &&  strtotime($query->row['updated_at']) - strtotime('now') < 120) {
-				$result = $this->getPacePlan();
-				$this->handleStorePaymentplan($result);
+				$this->handleStorePaymentplan();
 				$this->db->query("UPDATE `" . DB_PREFIX . "cron` SET status = 1 where cron_id = 2;");
 			}
 		}
 	}
 
-	private function checkConfigExist()
+	public function checkConfigExist()
 	{
 
 		$query_setting = $this->db->query("SELECT * FROM `" . DB_PREFIX . "setting` where  `key` = 'payment_pace_checkout_plans';");
@@ -246,8 +244,9 @@ class ModelExtensionModuleCron extends Model
 		}
 	}
 
-	private function handleStorePaymentplan($data)
+	public function handleStorePaymentplan($data)
 	{
+		$data = $this->getPacePlan();
 		if (!!$data) {
 			$this->load->model('setting/setting');
 			$json_data = json_encode($data);

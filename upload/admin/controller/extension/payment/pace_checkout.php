@@ -26,7 +26,9 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$this->model_setting_setting->editSetting('payment_pace_checkout', $this->request->post);
-
+			$this->load->model('extension/module/cron');
+			$this->model_extension_module_cron->checkConfigExist();
+			$this->model_extension_module_cron->handleStorePaymentplan();
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true));
