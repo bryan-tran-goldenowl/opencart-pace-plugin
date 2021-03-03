@@ -25,10 +25,19 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$this->load->model('extension/payment/pace_checkout');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+			$old_username = $this->model_setting_setting->getSettingValue('payment_pace_checkout_username');
+			$old_username_sandbox = $this->model_setting_setting->getSettingValue('payment_pace_checkout_username_sandbox');
+
+			$post = $this->request->post;
+
 			$this->model_setting_setting->editSetting('payment_pace_checkout', $this->request->post);
-			$this->load->model('extension/module/cron');
-			$this->model_extension_module_cron->checkConfigExist();
-			$this->model_extension_module_cron->handleStorePaymentplan();
+			if ((isset($post['payment_pace_checkout_username']) &&  $old_username != $post['payment_pace_checkout_username']) ||
+				isset($post['payment_pace_checkout_username_sandbox']) && $old_username_sandbox != $post['payment_pace_checkout_username_sandbox']
+			) {
+				$this->load->model('extension/module/cron');
+				$this->model_extension_module_cron->checkConfigExist();
+				$this->model_extension_module_cron->handleStorePaymentplan();
+			}
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true));
