@@ -4,7 +4,15 @@
 }
 
 .align-self-center {
-  align-self: center;
+  align-self: flex-end;
+  max-width: 35rem;
+  background-color: #fafafa;
+  font-family: "StudioFeixenSerif";
+  font-size: 1.5rem;
+}
+
+.checkout-header-content {
+  margin: 1rem 1rem 0rem 1rem;
 }
 
 .logo {
