@@ -76,7 +76,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 				throw new \Exception('Session is expired please refresh a page');
 			}
 
-
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode($transaction));
 		} catch (Exception $e) {

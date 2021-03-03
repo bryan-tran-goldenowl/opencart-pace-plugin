@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.5-rc03</version>
-  <code>1.0.5-rc03</code>
+  <version>1.0.6-rc01</version>
+  <code>1.0.6-rc01</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -566,63 +566,7 @@
     </operation>
   </file>
 
-  <file path="catalog/controller/api/order.php">
-    <operation>
-      <search regex="true"><![CDATA[~(if\s?\(\$order_info\)\s\{\D+\$this->model_checkout_order->addOrderHistory\(\D+\} )~]]></search>
-      <add trim="true"><![CDATA[
-        if ($order_info) {
-          if ( 'pace_checkout' === $order_info['payment_code'] ) {
-
-            /* get Pace transaction is attached to the order */
-            $transaction = $this->db->query("SELECT transaction_id FROM `". DB_PREFIX ."order_transaction` WHERE order_id = '" . (int) $order_id . "'");
-                    
-            if ( !$transaction->num_rows ) {
-              $json['error'] = $this->language->get('unable_pace_transaction');
-            } else {
-              $transaction_id = $transaction->row['transaction_id'];
-
-              /* check Pace transaction before update Order status */
-              $this->load->model('extension/module/pace');
-
-              /* get Pace credential */
-              $credential = $this->model_extension_module_pace->getUser();
-                      
-              $ch = curl_init();
-              curl_setopt($ch, CURLOPT_URL, $credential['api'] . '/v1/checkouts/' . $transaction_id);
-              curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-              curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-              curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'content-Type: text/plain',
-                'cache-control: no-cache',
-                'authorization: Basic ' . base64_encode($credential['user_name'] . ':' . $credential['password'])
-              ));
-              $result = json_decode( curl_exec($ch) );
-              $errors = curl_error($ch);
-              curl_close($ch);
-
-              if ( $errors ) {
-                $json['error'] = $this->language->get('unable_pace_transaction');
-              } else {
-                $status_convert = $this->model_extension_module_pace->updateOrderStatus( $result->status );
-
-                if ( (int) $status_convert != $this->request->post['order_status_id'] ) {
-                  $json['error'] = sprintf( $this->language->get( 'unable_pace_update_order' ),  );
-                } else {
-                  $this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], $this->request->post['comment'], $this->request->post['notify'], $this->request->post['override']);
-                  $json['success'] = $this->language->get('text_success');
-                }
-              }
-            }
-          } else {
-            $this->model_checkout_order->addOrderHistory($order_id, $this->request->post['order_status_id'], $this->request->post['comment'], $this->request->post['notify'], $this->request->post['override']);
-            $json['success'] = $this->language->get('text_success');  
-          }
-        } 
-      ]]></add>
-    </operation>
-  </file>
-
-   <file path="catalog/model/checkout/order.php">
+  <file path="catalog/model/checkout/order.php">
     <operation>
       <search><![CDATA[$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");]]></search>
       <add position="after"><![CDATA[
@@ -633,4 +577,3 @@
   </file>
 
 </modification>
-

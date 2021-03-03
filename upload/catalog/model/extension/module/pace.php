@@ -28,7 +28,7 @@ class ModelExtensionModulePace extends Model
 		$this->load->model('extension/total/voucher');
 
 		// Vouchers
-		if (isset($data['vouchers'])) {
+		if (isset($data['vouchers'])) {	
 			foreach ($data['vouchers'] as $voucher) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "order_voucher SET order_id = '" . (int) $order_id . "', description = '" . $this->db->escape($voucher['description']) . "', code = '" . $this->db->escape($voucher['code']) . "', from_name = '" . $this->db->escape($voucher['from_name']) . "', from_email = '" . $this->db->escape($voucher['from_email']) . "', to_name = '" . $this->db->escape($voucher['to_name']) . "', to_email = '" . $this->db->escape($voucher['to_email']) . "', voucher_theme_id = '" . (int) $voucher['voucher_theme_id'] . "', message = '" . $this->db->escape($voucher['message']) . "', amount = '" . (float) $voucher['amount'] . "'");
 
@@ -331,7 +331,10 @@ class ModelExtensionModulePace extends Model
 		$user_name = $setting['payment_pace_checkout_username_sandbox'];
 		$password = $setting['payment_pace_checkout_password_sandbox'];
 		$api = "https://api-playground.pacenow.co";
-		if ($setting['payment_pace_checkout_status'] && !$setting['payment_pace_checkout_status_sandbox']) {
+
+		if ( 
+			( isset($setting['payment_pace_checkout_status']) && $setting['payment_pace_checkout_status'] )
+			&& !$setting['payment_pace_checkout_status_sandbox']) {
 			$api = 'https://api.pacenow.co';
 			$user_name = $setting['payment_pace_checkout_username'];
 			$password = $setting['payment_pace_checkout_password'];
