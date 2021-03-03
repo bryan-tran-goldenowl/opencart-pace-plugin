@@ -17,12 +17,10 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 
 	public function index()
 	{
-		$this->load->language('extension/payment/pace_checkout');
-
-		$this->document->setTitle($this->language->get('heading_title'));
-
 		$this->load->model('setting/setting');
 		$this->load->model('extension/payment/pace_checkout');
+		$this->load->language('extension/payment/pace_checkout');
+		$this->document->setTitle($this->language->get('heading_title'));
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$this->model_setting_setting->editSetting('payment_pace_checkout', $this->request->post);
@@ -30,7 +28,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			$this->model_extension_module_cron->checkConfigExist();
 			$this->model_extension_module_cron->handleStorePaymentplan();
 			$this->session->data['success'] = $this->language->get('text_success');
-
 			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true));
 		}
 
@@ -41,7 +38,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		}
 
 		$data['breadcrumbs'] = array();
-
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('text_home'),
 			'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
@@ -58,9 +54,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		);
 
 		$data['action'] = $this->url->link('extension/payment/pace_checkout', 'user_token=' . $this->session->data['user_token'], true);
-
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
-
 
 		$this->load->model('localisation/order_status');
 
@@ -68,6 +62,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$data['order_statuses_unpaid'] = self::_unpaid_order_statuses($data['order_statuses']);
 
 		$field = [
+			'payment_pace_checkout_title',
 			'payment_pace_checkout_status',
 			'payment_pace_checkout_pace_mode',
 			'payment_pace_checkout_status_sandbox',
@@ -92,7 +87,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'payment_pace_checkout_catalog_widget_style',
 			'payment_pace_checkout_widget_status',
 			'payment_pace_checkout_primary_color',
-			'payment_pace_checkout_product_second_color',
 			'payment_pace_checkout_second_color',
 			'payment_pace_checkout_text_timeline_color',
 			'payment_pace_checkout_background_color',
@@ -102,7 +96,6 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 			'payment_pace_checkout_logo_style',
 			'payment_pace_checkout_cron'
 		];
-
 
 		foreach ($field as $value) {
 			if (isset($this->request->post[$value])) {

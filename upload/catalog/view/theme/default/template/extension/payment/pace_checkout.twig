@@ -1,10 +1,25 @@
 <link rel="stylesheet" href="/catalog/view/javascript/pace/css/pace-font.css">
 <div class="flex-column">
 	<p class="logo align-self-center">Pace</p>
-	<div class="align-self-center" id='pace-pay-widget-container' data-price='{{price}}' data-enabled='{{payment_pace_checkout_widget_status}}' data-second="{{payment_pace_checkout_second_color}}" data-primary="{{payment_pace_checkout_primary_color}}" data-timeline="{{payment_pace_checkout_text_timeline_color}}" data-background="{{payment_pace_checkout_background_color}}" data-foreground="{{payment_pace_checkout_foreground_color}}" data-fontsize="{{payment_pace_checkout_fontsize}}"/>
+	<div 
+		class="align-self-center" 
+		id='pace-pay-widget-container' 
+		data-price='{{price}}' 
+		data-enabled='{{payment_pace_checkout_widget_status}}' 
+		data-second="{{payment_pace_checkout_second_color}}" 
+		data-primary="{{payment_pace_checkout_primary_color}}" 
+		data-timeline="{{payment_pace_checkout_text_timeline_color}}" 
+		data-background="{{payment_pace_checkout_background_color}}" 
+		data-foreground="{{payment_pace_checkout_foreground_color}}" 
+		data-fontsize="{{payment_pace_checkout_fontsize}}"/>
 	<div class="buttons">
 		<div class="pull-right">
-			<input type="button" value="{{ button_confirm }}" id="button-confirm" data-loading-text="{{ text_loading }}" class="btn btn-primary"/>
+			<input 
+				id="button-confirm" 
+				type="button" 
+				value="{{ button_confirm }}" 
+				data-loading-text="{{ text_loading }}" 
+				class="btn btn-primary"/>
 			<div class="checkout-transaction"></div>
 		</div>
 	</div>

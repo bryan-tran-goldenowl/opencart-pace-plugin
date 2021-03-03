@@ -3,6 +3,7 @@
 $_['heading_title']                            = 'Pace Checkout';
 
 // Text
+$_['text_title']							   = 'Title';
 $_['text_extension']                           = 'Extensions';
 $_['text_success']                             = 'Success: You have modified Pace checkout payment module!';
 $_['text_edit']                                = 'Edit Pace checkout';

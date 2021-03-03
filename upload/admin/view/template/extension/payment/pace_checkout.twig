@@ -73,13 +73,12 @@ event.target.value = event.target.checked ? 1 : 0
 		{% endif %}
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title">
-					<i class="fa fa-pencil"></i>
-					{{ text_edit }}</h3>
+				<h3 class="panel-title"> <i class="fa fa-pencil"></i> {{ text_edit }}</h3>
 			</div>
 			<div class="panel-body">
 				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-payment" class="form-horizontal">
-
+					<h3>Pace</h3>
+					<p>Manage Pace’s API connectivity and widgets settings</p>
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
 						<div class="col-sm-5">
@@ -90,8 +89,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">{{ enable_sandbox }}</label>
 						<div class="col-sm-5">
@@ -102,8 +99,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">{{ pay_mode_title }}</label>
 						<div class="col-sm-5">
@@ -111,6 +106,55 @@ event.target.value = event.target.checked ? 1 : 0
 								<option {{ payment_pace_checkout_pace_mode == '1' ? 'selected' : ''}} value="1">Popup</option>
 								<option {{ payment_pace_checkout_pace_mode == '2' ? 'selected' : ''}} value="2">Redirect</option>
 							</select>
+						</div>
+					</div>
+					<div class="form-group display-flex">
+						<label class="col-sm-2 control-label" for="input-pace-title">{{ text_title }}</label>
+						<div class="col-sm-5">
+							<input type="text" name="payment_pace_checkout_title" class="form-control" value="{{ payment_pace_checkout_title }}">
+						</div>
+					</div>
+
+					<h3>API Credentials</h3>
+					<p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Client ID</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_username %}
+								<input name="payment_pace_checkout_username" class="form-control" type="text" value="{{ payment_pace_checkout_username }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_username" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Client Secret</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_password %}
+								<input name="payment_pace_checkout_password" class="form-control" type="password" value="{{ payment_pace_checkout_password }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_password" class="form-control" type="password" value=""/>
+							{% endif %}
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Playground Client ID</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_username_sandbox %}
+								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value="{{ payment_pace_checkout_username_sandbox }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value=""/>
+							{% endif %}
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-status">Playground Client Secret</label>
+						<div class="col-sm-5">
+							{% if payment_pace_checkout_password_sandbox %}
+								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value="{{ payment_pace_checkout_password_sandbox }}"/>
+							{%  else %}
+								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value=""/>
+							{% endif %}
 						</div>
 					</div>
 
@@ -161,69 +205,19 @@ event.target.value = event.target.checked ? 1 : 0
 						</div>
 					</div>
 					{# End Manage status orders #}
-          <div class="form-group display-flex">
-            <label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
-            <div class="col-sm-5">
-              <select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
-                <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
-                <option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
-                <option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
-              </select>
-            </div>
-          </div>
-          
-					<h3>
-						API Credentials
-					</h3>
-					<p>You must be a Pace registered merchant to get these credentials. Please contact merchant-integration@pacenow.co if you need help retrieving these details.</p>
-					<div class="form-group">
-						<label class="col-sm-2 control-label" for="input-status">Client ID</label>
-						<div class="col-sm-5">
-							{% if payment_pace_checkout_username %}
-								<input name="payment_pace_checkout_username" class="form-control" type="text" value="{{ payment_pace_checkout_username }}"/>
-							{%  else %}
-								<input name="payment_pace_checkout_username" class="form-control" type="text" value=""/>
-							{% endif %}
-						</div>
-					</div>
-
-					<div class="form-group">
-						<label class="col-sm-2 control-label" for="input-status">Client Secret</label>
-						<div class="col-sm-5">
-							{% if payment_pace_checkout_password %}
-								<input name="payment_pace_checkout_password" class="form-control" type="password" value="{{ payment_pace_checkout_password }}"/>
-							{%  else %}
-								<input name="payment_pace_checkout_password" class="form-control" type="password" value=""/>
-							{% endif %}
-						</div>
-					</div>
-
-
-					<div class="form-group">
-						<label class="col-sm-2 control-label" for="input-status">Playground Client ID</label>
-						<div class="col-sm-5">
-							{% if payment_pace_checkout_username_sandbox %}
-								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value="{{ payment_pace_checkout_username_sandbox }}"/>
-							{%  else %}
-								<input name="payment_pace_checkout_username_sandbox" class="form-control" type="text" value=""/>
-							{% endif %}
-						</div>
-					</div>
-
-					<div class="form-group">
-						<label class="col-sm-2 control-label" for="input-status">Playground Client Secret</label>
-						<div class="col-sm-5">
-							{% if payment_pace_checkout_password_sandbox %}
-								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value="{{ payment_pace_checkout_password_sandbox }}"/>
-							{%  else %}
-								<input name="payment_pace_checkout_password_sandbox" class="form-control" type="password" value=""/>
-							{% endif %}
-						</div>
-					</div>
+          			<div class="form-group display-flex">
+            			<label class="col-sm-2 control-label" for="input-status">{{ order_status }}</label>
+            			<div class="col-sm-5">
+              				<select class="form-control" value="{{payment_pace_checkout_cron}}" name="payment_pace_checkout_cron">
+				                <option {{ payment_pace_checkout_cron == 300 ? 'selected' : ''}} value="300">Every 5 minutes</option>
+				                <option {{ payment_pace_checkout_cron == 900 ? 'selected' : ''}} value="900">Every 15 minutes</option>
+				                <option {{ payment_pace_checkout_cron == 1800 ? 'selected' : ''}} value="1800">Every 30 minutes</option>
+              				</select>
+            			</div>
+          			</div>
 
 					<h3>Pace Widgets</h3>
 					<h4>Product Widget</h4>
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">Enable</label>
 						<div class="col-sm-5">
@@ -234,8 +228,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">Theme color</label>
 						<div class="col-sm-5">
@@ -246,8 +238,6 @@ event.target.value = event.target.checked ? 1 : 0
 							</select>
 						</div>
 					</div>
-
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
 						<div class="col-sm-5">
@@ -258,7 +248,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text second color</label>
 						<div class="col-sm-5">
@@ -269,7 +258,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Font size</label>
 						<div class="col-sm-5">
@@ -280,7 +268,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">widget style</label>
 						<div class="col-sm-5">
@@ -292,9 +279,7 @@ event.target.value = event.target.checked ? 1 : 0
 						</div>
 					</div>
 
-
 					<h4>Product Catalog Widget</h4>
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">Enable</label>
 						<div class="col-sm-5">
@@ -305,8 +290,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">Theme color</label>
 						<div class="col-sm-5">
@@ -317,8 +300,6 @@ event.target.value = event.target.checked ? 1 : 0
 							</select>
 						</div>
 					</div>
-
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
 						<div class="col-sm-5">
@@ -329,7 +310,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Font size</label>
 						<div class="col-sm-5">
@@ -340,7 +320,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">widget style</label>
 						<div class="col-sm-5">
@@ -352,9 +331,7 @@ event.target.value = event.target.checked ? 1 : 0
 						</div>
 					</div>
 
-
 					<h4>Checkout Widget</h4>
-
 					<div class="form-group display-flex">
 						<label class="col-sm-2 control-label" for="input-status">Enable</label>
 						<div class="col-sm-5">
@@ -365,8 +342,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text primary color</label>
 						<div class="col-sm-5">
@@ -377,8 +352,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text second color</label>
 						<div class="col-sm-5">
@@ -389,7 +362,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Text timeline color</label>
 						<div class="col-sm-5">
@@ -400,8 +372,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Background color</label>
 						<div class="col-sm-5">
@@ -412,7 +382,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Foreground color</label>
 						<div class="col-sm-5">
@@ -423,7 +392,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-sm-2 control-label" for="input-status">Font size</label>
 						<div class="col-sm-5">
@@ -434,7 +402,6 @@ event.target.value = event.target.checked ? 1 : 0
 							{% endif %}
 						</div>
 					</div>
-
 
 					<h4>Options</h4>
 					<div class="form-group display-flex">
