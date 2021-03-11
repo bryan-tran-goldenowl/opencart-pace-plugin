@@ -2,8 +2,8 @@
 <modification>
   <generator>Created with OpenIX - https://openix.io/en/tool/opencart/ocmod</generator>
   <name>Pace for Opencart</name>
-  <version>1.0.6-rc01</version>
-  <code>1.0.6-rc01</code>
+  <version>1.0.6</version>
+  <code>1.0.6</code>
   <author>Pace Enterprise Pte Ltd</author>
   <link>https://developers.pacenow.co/</link>
 
@@ -332,7 +332,6 @@
     </operation>
   </file>
 
-
   <file path="catalog/controller/checkout/failure.php" error="log">
     <operation>
       <search><![CDATA[public function index() {]]></search>
@@ -340,7 +339,6 @@
      
     private function handleCancelTransaction()
     {
-
         $this->load->model('extension/module/pace');
         $order_id = isset($this->session->data['order_id']) ? $this->session->data['order_id'] : null;
 
@@ -359,10 +357,10 @@
         curl_setopt($ch, CURLOPT_URL, $user['api'] . '/v1/checkouts/' . $transaction['transactionID'] . '/cancel');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
-
+        $pace_gateway_version = "1.0.6";
         $headers = array();
         $headers[] = 'Content-Type: text/plain';
-
+        $headers[] = 'x-pace-platformversion: ' . sprintf( '%s-%s, pace-%s', VERSION, 'opencart',  $pace_gateway_version );
         $headers[] = 'Authorization: Basic ' . base64_encode($user['user_name'] . ':' . $user['password']);;
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 

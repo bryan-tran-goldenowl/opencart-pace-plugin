@@ -1,4 +1,5 @@
 <?php
+const PACE_GATEWAY_VERSION = "1.0.6";
 class ControllerExtensionPaymentPaceCheckout extends Controller
 {
 	public function index()
@@ -156,6 +157,7 @@ class ControllerExtensionPaymentPaceCheckout extends Controller
 		$headers = array();
 		$headers[] = 'Content-Type: text/plain';
 		$headers[] = 'Authorization: Basic ' . base64_encode($data['user_name'] . ':' . $data['password']);
+		$headers[] = 'x-pace-platformversion: ' . sprintf( '%s-%s, pace-%s', VERSION, 'opencart', PACE_GATEWAY_VERSION );
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$result = curl_exec($ch);

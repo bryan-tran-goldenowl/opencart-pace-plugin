@@ -1,7 +1,7 @@
 <?php
 
 // define payment plans key
-define( 'PAYMENT_PLAN', 'payment_pace_checkout_plans' );
+define('PAYMENT_PLAN', 'payment_pace_checkout_plans');
 
 class ModelExtensionModulePace extends Model
 {
@@ -28,7 +28,7 @@ class ModelExtensionModulePace extends Model
 		$this->load->model('extension/total/voucher');
 
 		// Vouchers
-		if (isset($data['vouchers'])) {	
+		if (isset($data['vouchers'])) {
 			foreach ($data['vouchers'] as $voucher) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "order_voucher SET order_id = '" . (int) $order_id . "', description = '" . $this->db->escape($voucher['description']) . "', code = '" . $this->db->escape($voucher['code']) . "', from_name = '" . $this->db->escape($voucher['from_name']) . "', from_email = '" . $this->db->escape($voucher['from_email']) . "', to_name = '" . $this->db->escape($voucher['to_name']) . "', to_email = '" . $this->db->escape($voucher['to_email']) . "', voucher_theme_id = '" . (int) $voucher['voucher_theme_id'] . "', message = '" . $this->db->escape($voucher['message']) . "', amount = '" . (float) $voucher['amount'] . "'");
 
@@ -117,14 +117,15 @@ class ModelExtensionModulePace extends Model
 	 * @return number              
 	 * @throws string
 	 */
-	public function updateOrderStatus($transaction) {
+	public function updateOrderStatus($transaction)
+	{
 		try {
 			// load Pace settings
 			$setting = $this->model_setting_setting->getSetting('payment_pace_checkout');
-			$statuses = is_array( $transaction ) ? $transaction['status'] : $transaction;
+			$statuses = is_array($transaction) ? $transaction['status'] : $transaction;
 			$order_status = null;
 
-			switch ( $statuses ) {
+			switch ($statuses) {
 				case 'cancelled':
 					$order_status = (int) $setting['payment_pace_checkout_order_status_transaction_cancelled'];
 					break;
@@ -332,9 +333,10 @@ class ModelExtensionModulePace extends Model
 		$password = $setting['payment_pace_checkout_password_sandbox'];
 		$api = "https://api-playground.pacenow.co";
 
-		if ( 
-			( isset($setting['payment_pace_checkout_status']) && $setting['payment_pace_checkout_status'] )
-			&& !$setting['payment_pace_checkout_status_sandbox']) {
+		if (
+			(isset($setting['payment_pace_checkout_status']) && $setting['payment_pace_checkout_status'])
+			&& !$setting['payment_pace_checkout_status_sandbox']
+		) {
 			$api = 'https://api.pacenow.co';
 			$user_name = $setting['payment_pace_checkout_username'];
 			$password = $setting['payment_pace_checkout_password'];
@@ -498,7 +500,7 @@ class ModelExtensionModulePace extends Model
 
 		$headers = array();
 		$headers[] = 'Content-Type: text/plain';
-
+		$headers[] = 'x-pace-platformversion: ' . sprintf('%s-%s, pace-%s', VERSION, 'opencart', PACE_GATEWAY_VERSION);
 		$headers[] = 'Authorization: Basic ' . base64_encode($user['user_name'] . ':' . $user['password']);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
@@ -518,15 +520,16 @@ class ModelExtensionModulePace extends Model
 	 * @return array|object
 	 * @since 1.0.5-rc02
 	 */
-	public function sendRequestPaymentPlans() {
+	public function sendRequestPaymentPlans()
+	{
 		// store logs
-		$this->log->write( 'Send a request to Pace API to get payment plans' );
+		$this->log->write('Send a request to Pace API to get payment plans');
 
 		$ch         = curl_init();
 		$credential = $this->getUser();
-		$token      = base64_encode( $credential['user_name'] . ':' . $credential['password'] );
+		$token      = base64_encode($credential['user_name'] . ':' . $credential['password']);
 
-		curl_setopt_array( $ch, array(
+		curl_setopt_array($ch, array(
 			CURLOPT_URL            => $credential['api'] . '/v1/checkouts/plans',
 			CURLOPT_TIMEOUT        => 30,
 			CURLOPT_ENCODING       => '',
@@ -539,19 +542,19 @@ class ModelExtensionModulePace extends Model
 				"authorization: Basic {$token}",
 				"cache-control: no-cache"
 			)
-		) );
+		));
 
-		$response = json_decode( curl_exec( $ch ) );
-		$error = curl_error( $ch );
+		$response = json_decode(curl_exec($ch));
+		$error = curl_error($ch);
 
-		curl_close( $ch );
+		curl_close($ch);
 
-		if ( $error ) {
-			throw new Exception( $error );
+		if ($error) {
+			throw new Exception($error);
 		}
 
-		if ( isset( $response->error ) ) {
-			throw new Exception( $response->error->message . '. code: ' . $response->correlation_id );
+		if (isset($response->error)) {
+			throw new Exception($response->error->message . '. code: ' . $response->correlation_id);
 		}
 
 		return $response;
@@ -563,17 +566,18 @@ class ModelExtensionModulePace extends Model
 	 * @throws string
 	 * @return array|object
 	 */
-	public function getPacePlan() {
+	public function getPacePlan()
+	{
 		try {
 			// load setting module if dont exist
-			if ( !$this->model_setting_setting ) {
+			if (!$this->model_setting_setting) {
 				$this->load->model('setting/setting');
 			}
-			
+
 			// retrieve pace payment plan from setting
 			$pace_settings = $this->model_setting_setting->getSetting('payment_pace_checkout');
-			
-			if ( $pace_settings && isset( $pace_settings[PAYMENT_PLAN] ) ) {
+
+			if ($pace_settings && isset($pace_settings[PAYMENT_PLAN])) {
 				return $pace_settings[PAYMENT_PLAN];
 			}
 
@@ -581,35 +585,36 @@ class ModelExtensionModulePace extends Model
 			$sendRequest = $this->sendRequestPaymentPlans();
 			return $sendRequest->list;
 		} catch (Exception $e) {
-			$this->log->write( $e->getMessage() );
+			$this->log->write($e->getMessage());
 			return [];
 		}
 	}
 
-	public function isAvailable( $total = null ) {
+	public function isAvailable($total = null)
+	{
 		try {
 			$getPacePlan = $this->getPacePlan();
 
-			if ( gettype( $getPacePlan ) === 'string' ) {
-				$getPacePlan = json_decode( $getPacePlan );
+			if (gettype($getPacePlan) === 'string') {
+				$getPacePlan = json_decode($getPacePlan);
 			}
 
 			// return false if get pace plan is failed
-			if ( ! $getPacePlan ) {
+			if (!$getPacePlan) {
 				throw new Exception("Error Processing Request", 1);
 			}
 
 			// check country and currency
-			$getStoreCountryID = $this->config->get( 'config_country_id' );
+			$getStoreCountryID = $this->config->get('config_country_id');
 
-			if ( ! $getStoreCountryID ) {
+			if (!$getStoreCountryID) {
 				throw new Exception("Error Processing Request", 1);
 			}
 
-			$sqlQuery = sprintf( "SELECT iso_code_2 FROM %s WHERE country_id = %d", DB_PREFIX . 'country', (int) $getStoreCountryID );
-			$getCountryByID = $this->db->query( $sqlQuery );
+			$sqlQuery = sprintf("SELECT iso_code_2 FROM %s WHERE country_id = %d", DB_PREFIX . 'country', (int) $getStoreCountryID);
+			$getCountryByID = $this->db->query($sqlQuery);
 
-			if ( ! $getCountryByID->num_rows ) {
+			if (!$getCountryByID->num_rows) {
 				throw new Exception("Error Processing Request", 1);
 			}
 
@@ -617,37 +622,37 @@ class ModelExtensionModulePace extends Model
 
 			$listAvailableCurrencies = [];
 
-			foreach ( $getPacePlan as $plan ) {
+			foreach ($getPacePlan as $plan) {
 				$listAvailableCurrencies[$plan->currencyCode] = $plan;
 			}
 
-			$getCurrency = $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get( 'config_currency' );
+			$getCurrency = $this->session->data['currency'] ? $this->session->data['currency'] : $this->config->get('config_currency');
 
-			if ( ! isset( $listAvailableCurrencies[$getCurrency] ) ) {
-				throw new Exception( "Currency not found.", 404 );
+			if (!isset($listAvailableCurrencies[$getCurrency])) {
+				throw new Exception("Currency not found.", 404);
 			}
 
 			$pacePlanFollowCurrency = $listAvailableCurrencies[$getCurrency];
 
 			// check plan country
-			if ( $pacePlanFollowCurrency->country !== $countryCode ) {
-				throw new Exception( "Pace doesn't support the client country.", 405 );
+			if ($pacePlanFollowCurrency->country !== $countryCode) {
+				throw new Exception("Pace doesn't support the client country.", 405);
 			}
 
 			// check plan currency
-			if ( ! in_array( $getCurrency, array_keys( $listAvailableCurrencies ) ) ) {
-				throw new Exception( "Pace doesn't support the client currency.", 405 );
+			if (!in_array($getCurrency, array_keys($listAvailableCurrencies))) {
+				throw new Exception("Pace doesn't support the client currency.", 405);
 			}
 
-			if ( isset( $total ) && $total > 0 ) {
-				if ( $total < $pacePlanFollowCurrency->minAmount->actualValue || $total > $pacePlanFollowCurrency->maxAmount->actualValue ) {
-					throw new Exception( "The price of the order is out of price range allows.", 405 );
-				}	
+			if (isset($total) && $total > 0) {
+				if ($total < $pacePlanFollowCurrency->minAmount->actualValue || $total > $pacePlanFollowCurrency->maxAmount->actualValue) {
+					throw new Exception("The price of the order is out of price range allows.", 405);
+				}
 			}
 
 			return $pacePlanFollowCurrency;
 		} catch (Exception $e) {
-			$this->log->write( $e->getMessage() );
+			$this->log->write($e->getMessage());
 			return false;
 		}
 	}
@@ -656,9 +661,9 @@ class ModelExtensionModulePace extends Model
 	{
 		$change_by = 'system';
 		$data = $this->session->data;
-		if(isset($data['api_id'])){
+		if (isset($data['api_id'])) {
 			$change_by = 'admin';
 		}
-		$this->db->query("INSERT INTO " . DB_PREFIX . "order_status_history SET order_id = '" . (int) $order_id . "', order_status_id = '" . (int) $status_id . "', change_by = '" . $change_by  . "', created_at = NOW(), updated_at = NOW()");		
+		$this->db->query("INSERT INTO " . DB_PREFIX . "order_status_history SET order_id = '" . (int) $order_id . "', order_status_id = '" . (int) $status_id . "', change_by = '" . $change_by  . "', created_at = NOW(), updated_at = NOW()");
 	}
 }
