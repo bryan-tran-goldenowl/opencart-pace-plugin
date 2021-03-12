@@ -1,5 +1,7 @@
 <?php
-const PACE_GATEWAY_VERSION = "1.0.6";
+if(!defined('PACE_GATEWAY_VERSION')){
+	define('PACE_GATEWAY_VERSION' , '1.0.6');
+}
 class ControllerExtensionPaymentPaceCheckout extends Controller
 {
 	public function index()

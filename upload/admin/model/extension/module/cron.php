@@ -3,7 +3,9 @@ const PENDING_STATUS = 1;
 const CANCELED_STATUS = 7;
 const COMPLETE_STATUS = 5;
 
-const PACE_GATEWAY_VERSION = '1.0.6';
+if(!defined('PACE_GATEWAY_VERSION')){
+	define('PACE_GATEWAY_VERSION' , '1.0.6');
+}
 const FAILED_STATUS = 10;
 class ModelExtensionModuleCron extends Model
 {

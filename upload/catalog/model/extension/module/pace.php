@@ -2,7 +2,9 @@
 
 // define payment plans key
 define('PAYMENT_PLAN', 'payment_pace_checkout_plans');
-
+if(!defined('PACE_GATEWAY_VERSION')){
+	define('PACE_GATEWAY_VERSION' , '1.0.6');
+}
 class ModelExtensionModulePace extends Model
 {
 	public function addOrder($data)
